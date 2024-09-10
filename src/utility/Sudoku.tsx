@@ -136,7 +136,7 @@ class Sudoku {
   constructor(diffuculty: SudokuDifficulty) {
     this.board = generateSudoku();
     this.difficulty = diffuculty;
-    this.revealed = [];
+    this.revealed = this.randomRevealed();
     this.filledIn = {};
   }
 
@@ -177,7 +177,7 @@ class Sudoku {
         );
       }
     }
-    this.revealed = randomSelections;
+    return randomSelections;
   }
 }
 
