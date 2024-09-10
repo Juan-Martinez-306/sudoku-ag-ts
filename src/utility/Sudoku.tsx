@@ -3,8 +3,8 @@ type NumToNumMap = {
   [key: number]: number;
 };
 
-type tuple = [number, number];
-function tupleEquals(a: tuple, b: tuple): boolean {
+export type tuple = [number, number];
+export function tupleEquals(a: tuple, b: tuple): boolean {
   return a[0] === b[0] && a[1] === b[1];
 }
 function isValid(
@@ -121,13 +121,13 @@ function randomSelectionFromBox(
   }
 }
 
-enum SudokuDifficulty {
+export enum SudokuDifficulty {
   Easy = 0,
   Medium = 1,
   Hard = 2,
 }
 
-class Sudoku {
+export class Sudoku {
   board: number[][];
   revealed: tuple[];
   filledIn: NumToNumMap;
@@ -145,7 +145,7 @@ class Sudoku {
 
     switch (this.difficulty) {
       case SudokuDifficulty.Easy:
-        revealAmounts = [1, 3, 5, 0, 0];
+        revealAmounts = [1, 3, 4, 1, 0];
         break;
       case SudokuDifficulty.Medium:
         revealAmounts = [2, 2, 2, 3, 0];
@@ -180,5 +180,3 @@ class Sudoku {
     return randomSelections;
   }
 }
-
-export default Sudoku;

@@ -1,6 +1,7 @@
 .sudoku-grid {
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
+    grid-template-columns: repeat(9, 40px);
+    grid-template-rows: repeat(9, 40px);
     gap: 0px;
     max-width: 360px;
     margin: auto;
@@ -17,6 +18,11 @@
     font-size: 20px;
     border: 1px solid #ccc;
     box-sizing: border-box;
+}
+
+.sudoku-cell.note-mode {
+    font-size: 8px;
+    text-align: left;
 }
 /* vertical lines */
 .sudoku-cell:nth-child(3n+4) {
