@@ -1,7 +1,4 @@
 import { Map } from "typescript";
-type NumToNumMap = {
-  [key: number]: number;
-};
 
 export type tuple = [number, number];
 export function tupleEquals(a: tuple, b: tuple): boolean {
@@ -130,7 +127,12 @@ export enum SudokuDifficulty {
 export class Sudoku {
   board: number[][];
   revealed: tuple[];
-  filledIn: NumToNumMap;
+  filledIn: {
+    [key: string]: number;
+  };
+  notes: {
+    [key: string]: Set<number>;
+  };
   difficulty: SudokuDifficulty;
 
   constructor(diffuculty: SudokuDifficulty) {
@@ -138,6 +140,7 @@ export class Sudoku {
     this.difficulty = diffuculty;
     this.revealed = this.randomRevealed();
     this.filledIn = {};
+    this.notes = {};
   }
 
   randomRevealed() {

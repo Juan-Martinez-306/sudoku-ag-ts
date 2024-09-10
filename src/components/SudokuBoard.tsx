@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Sudoku, tupleEquals } from "../utility/Sudoku";
+import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
@@ -9,21 +10,15 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
   const [board, setBoard] = useState<string[][]>(
     Array.from({ length: 9 }, () => Array(9).fill(""))
   );
+  const [selectedBox, setSelectedBox] = useState<number>(-1);
   const [noteMode, setNoteMode] = useState<boolean>(false);
-  const handleChange = (row: number, col: number, value: string) => {
-    if (value === "0") {
-      return;
+
+  const handleBoxClick = (row: number, col: number) => {
+    if (selectedBox === row * 9 + col) {
+      setSelectedBox(-1);
+    } else {
+      setSelectedBox(row * 9 + col);
     }
-    if (!noteMode && sudokuObj.board[row][col] !== Number(value)) {
-      alert("WRONG PLACE");
-      return;
-    } else if (!noteMode) {
-      alert("CORRECT PLACE");
-    }
-    const newGrid = board.map((r, rowIndex) =>
-      r.map((c, colIndex) => (rowIndex === row && colIndex === col ? value : c))
-    );
-    setBoard(newGrid);
   };
   return (
     <div>
@@ -38,15 +33,10 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
                   {sudokuObj.board[rowIndex][colIndex]}
                 </div>
               ) : (
-                <input
+                <SudokuBox
                   key={colIndex}
-                  type="text"
-                  maxLength={noteMode ? 9 : 1}
-                  value={value}
-                  onChange={(e) =>
-                    handleChange(rowIndex, colIndex, e.target.value)
-                  }
-                  className={`sudoku-cell ${noteMode ? "note-mode" : ""}`}
+                  isSelected={selectedBox === rowIndex * 9 + colIndex}
+                  onClick={() => handleBoxClick(rowIndex, colIndex)}
                 />
               )
             )}
@@ -58,7 +48,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
           setNoteMode(!noteMode);
         }}
       >
-        Set Node Mode - {String(!noteMode)}
+        Change Note Mode - {String(noteMode)}
       </button>
     </div>
   );
