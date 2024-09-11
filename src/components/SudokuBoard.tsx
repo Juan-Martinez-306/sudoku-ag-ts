@@ -34,9 +34,12 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
                 </div>
               ) : (
                 <SudokuBox
-                  key={colIndex}
+                  key={rowIndex * 9 + colIndex}
                   isSelected={selectedBox === rowIndex * 9 + colIndex}
                   onClick={() => handleBoxClick(rowIndex, colIndex)}
+                  sudokuObj={sudokuObj}
+                  boxNum={rowIndex * 9 + colIndex}
+                  noteMode={noteMode}
                 />
               )
             )}

@@ -128,10 +128,10 @@ export class Sudoku {
   board: number[][];
   revealed: tuple[];
   filledIn: {
-    [key: string]: number;
+    [key: string]: string;
   };
   notes: {
-    [key: string]: Set<number>;
+    [key: string]: Set<String>;
   };
   difficulty: SudokuDifficulty;
 
