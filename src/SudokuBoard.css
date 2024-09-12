@@ -31,7 +31,8 @@
 }
 
 .wrong-highlight {
-    color: red;
+    background-color: red;
+    border: 1px solid red;
 }
 /* vertical lines */
 .sudoku-cell:nth-child(3n+4) {

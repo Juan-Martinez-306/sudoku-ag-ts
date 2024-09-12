@@ -135,6 +135,7 @@ export class Sudoku {
   };
   showWrong: Set<number>;
   difficulty: SudokuDifficulty;
+  lives: number;
 
   constructor(diffuculty: SudokuDifficulty) {
     this.board = generateSudoku();
@@ -143,12 +144,17 @@ export class Sudoku {
     this.filledIn = {};
     this.notes = {};
     this.showWrong = new Set<number>();
+    this.lives = 5 - this.difficulty * 2;
   }
 
   getElementAtBoxNum(boxNum: number) {
     const row = Math.floor(boxNum / 9);
     const col = boxNum % 9;
     return this.board[row][col];
+  }
+
+  removeLife() {
+    this.lives--;
   }
 
   randomRevealed() {

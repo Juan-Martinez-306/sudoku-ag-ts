@@ -31,7 +31,11 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     }
     const handleKeyPress = (event: KeyboardEvent) => {
       // only accept numerical key presses
-      if (event.key >= "1" && event.key <= "9") {
+      if (
+        sudokuObj.filledIn[JSON.stringify(boxNum)] === "" &&
+        event.key >= "1" &&
+        event.key <= "9"
+      ) {
         const newSudokuObj = new Sudoku(sudokuObj.difficulty);
         Object.assign(newSudokuObj, sudokuObj);
 
@@ -61,6 +65,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
             newSudokuObj.filledIn[JSON.stringify(boxNum)] = event.key;
           } else {
             alert("WRONG ONE");
+            newSudokuObj.removeLife();
             for (let i = 0; i < 9; ++i) {
               if (String(newSudokuObj.board[row][i]) === event.key) {
                 newSudokuObj.showWrong.add(row * 9 + i);
@@ -121,7 +126,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
           </div>
         ))
       ) : (
-        <div className="sudoku-number">
+        <div className="sudoku-number ">
           {sudokuObj.filledIn[JSON.stringify(boxNum)]}
         </div>
       )}

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sudoku, tupleEquals } from "../utility/Sudoku";
 import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
   setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
+  setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const rowsColsToBoxNum = (row: number, col: number) => {
@@ -14,6 +15,7 @@ const rowsColsToBoxNum = (row: number, col: number) => {
 const SudokuBoard: React.FC<SudokuBoardProps> = ({
   sudokuObj,
   setSudokuObj,
+  setGameOver,
 }) => {
   const [board, setBoard] = useState<string[][]>(
     Array.from({ length: 9 }, () => Array(9).fill(""))
@@ -25,6 +27,12 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
     console.log("HERE");
     return sudokuObj.showWrong.has(boxNum);
   };
+
+  useEffect(() => {
+    if (sudokuObj.lives <= 0) {
+      setGameOver(true);
+    }
+  }, [sudokuObj.lives, setGameOver]);
 
   const handleBoxClick = (row: number, col: number) => {
     if (selectedBox === rowsColsToBoxNum(row, col)) {
@@ -76,6 +84,9 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
       >
         Change Note Mode - {String(noteMode)}
       </button>
+      <div>
+        <span>{"Lives = " + String(sudokuObj.lives)}</span>
+      </div>
     </div>
   );
 };
