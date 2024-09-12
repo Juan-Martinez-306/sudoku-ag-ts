@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import SudokuBoard from "./components/SudokuBoard";
-import { Sudoku } from "./utility/Sudoku";
+import { Sudoku, SudokuDifficulty } from "./utility/Sudoku";
 
 function App() {
-  const sudokuObj = new Sudoku(0);
+  const [sudokuObj, setSodukuObj] = useState<Sudoku>(
+    new Sudoku(SudokuDifficulty.Easy)
+  );
   return (
     <div className="App">
-      <SudokuBoard sudokuObj={sudokuObj} />
+      <SudokuBoard sudokuObj={sudokuObj} setSudokuObj={setSodukuObj} />
     </div>
   );
 }

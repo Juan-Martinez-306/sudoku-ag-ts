@@ -4,20 +4,33 @@ import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
+  setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
 }
 
-const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
+const rowsColsToBoxNum = (row: number, col: number) => {
+  return row * 9 + col;
+};
+
+const SudokuBoard: React.FC<SudokuBoardProps> = ({
+  sudokuObj,
+  setSudokuObj,
+}) => {
   const [board, setBoard] = useState<string[][]>(
     Array.from({ length: 9 }, () => Array(9).fill(""))
   );
   const [selectedBox, setSelectedBox] = useState<number>(-1);
   const [noteMode, setNoteMode] = useState<boolean>(false);
 
+  const shouldHighlightAsWrong = (boxNum: number) => {
+    console.log("HERE");
+    return sudokuObj.showWrong.has(boxNum);
+  };
+
   const handleBoxClick = (row: number, col: number) => {
-    if (selectedBox === row * 9 + col) {
+    if (selectedBox === rowsColsToBoxNum(row, col)) {
       setSelectedBox(-1);
     } else {
-      setSelectedBox(row * 9 + col);
+      setSelectedBox(rowsColsToBoxNum(row, col));
     }
   };
   return (
@@ -29,16 +42,26 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ sudokuObj }) => {
               sudokuObj.revealed.find((tuple) =>
                 tupleEquals(tuple, [rowIndex, colIndex])
               ) ? (
-                <div key={colIndex} className="sudoku-cell">
+                <div
+                  key={colIndex}
+                  className={`sudoku-cell ${
+                    shouldHighlightAsWrong(rowsColsToBoxNum(rowIndex, colIndex))
+                      ? "wrong-highlight"
+                      : ""
+                  }`}
+                >
                   {sudokuObj.board[rowIndex][colIndex]}
                 </div>
               ) : (
                 <SudokuBox
-                  key={rowIndex * 9 + colIndex}
-                  isSelected={selectedBox === rowIndex * 9 + colIndex}
+                  key={rowsColsToBoxNum(rowIndex, colIndex)}
+                  isSelected={
+                    selectedBox === rowsColsToBoxNum(rowIndex, colIndex)
+                  }
                   onClick={() => handleBoxClick(rowIndex, colIndex)}
                   sudokuObj={sudokuObj}
-                  boxNum={rowIndex * 9 + colIndex}
+                  setSudokuObj={setSudokuObj}
+                  boxNum={rowsColsToBoxNum(rowIndex, colIndex)}
                   noteMode={noteMode}
                 />
               )

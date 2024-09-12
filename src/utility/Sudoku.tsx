@@ -133,6 +133,7 @@ export class Sudoku {
   notes: {
     [key: string]: Set<String>;
   };
+  showWrong: Set<number>;
   difficulty: SudokuDifficulty;
 
   constructor(diffuculty: SudokuDifficulty) {
@@ -141,6 +142,13 @@ export class Sudoku {
     this.revealed = this.randomRevealed();
     this.filledIn = {};
     this.notes = {};
+    this.showWrong = new Set<number>();
+  }
+
+  getElementAtBoxNum(boxNum: number) {
+    const row = Math.floor(boxNum / 9);
+    const col = boxNum % 9;
+    return this.board[row][col];
   }
 
   randomRevealed() {
