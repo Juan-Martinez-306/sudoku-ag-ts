@@ -94,6 +94,29 @@ function shuffleArray(array: number[]): number[] {
   return array;
 }
 
+const areInSameSudokuBox = (bx1: number, bx2: number) => {
+  const getCorner = (boxNum: number) => {
+    const row = Math.floor(boxNum / 9);
+    const col = boxNum % 9;
+    const boxRow = Math.floor(row / 3) * 3;
+    const boxCol = Math.floor(col / 3) * 3;
+    return { boxRow, boxCol };
+  };
+
+  const box1Corner = getCorner(bx1);
+  const box2Corner = getCorner(bx2);
+
+  return (
+    box1Corner.boxRow === box2Corner.boxRow &&
+    box1Corner.boxCol === box2Corner.boxCol
+  );
+};
+
+const areInSameSudokuRowOrCol = (bx1: number, bx2: number) => {
+  const sameRow = Math.floor(bx1 / 9) === Math.floor(bx2 / 9);
+  const sameCol = bx1 % 9 === bx2 % 9;
+  return sameRow || sameCol;
+};
 function randomSelectionFromBox(
   boxRow: number,
   boxColumn: number,
@@ -168,6 +191,19 @@ export class Sudoku {
     return this.board[row][col];
   }
 
+  isNoteValidInBoxNum(boxNum: number, note: number) {
+    for (const boxNum2 of this.revealed) {
+      if (
+        areInSameSudokuBox(boxNum, boxNum2) ||
+        areInSameSudokuRowOrCol(boxNum, boxNum2)
+      ) {
+        if (this.getElementAtBoxNum(boxNum2) === note) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
   determineValuesLeft() {
     for (const boxNum of this.revealed) {
       const valueAtPosition = this.getElementAtBoxNum(boxNum);

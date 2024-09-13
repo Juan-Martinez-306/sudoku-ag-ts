@@ -26,6 +26,9 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
 }) => {
   const [notes, setNotes] = useState<Set<string>>(new Set());
   // const [filledIn, setFilled] = useState<string | null>(null);
+  const row = Math.floor(boxNum / 9);
+  const col = boxNum % 9;
+
   useEffect(() => {
     if (!isSelected) {
       sudokuObj.showWrong = new Set<number>();
@@ -38,30 +41,53 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
         Object.assign(newSudokuObj, sudokuObj);
 
         if (noteMode) {
-          setNotes((prevNotes) => {
-            const newSet = new Set(prevNotes);
-            if (newSet.has(event.key)) {
-              newSet.delete(event.key);
-              newSudokuObj.notes[JSON.stringify(boxNum)].delete(event.key);
-            } else {
-              newSet.add(event.key);
-              newSudokuObj.notes[JSON.stringify(boxNum)].add(event.key);
+          if (newSudokuObj.isNoteValidInBoxNum(boxNum, Number(event.key))) {
+            setNotes((prevNotes) => {
+              const newSet = new Set(prevNotes);
+              if (newSet.has(event.key)) {
+                newSet.delete(event.key);
+                newSudokuObj.notes[JSON.stringify(boxNum)].delete(event.key);
+              } else {
+                newSet.add(event.key);
+                newSudokuObj.notes[JSON.stringify(boxNum)].add(event.key);
+              }
+              setSudokuObj(newSudokuObj);
+              return newSet;
+            });
+          } else {
+            for (let i = 0; i < 9; ++i) {
+              if (String(newSudokuObj.board[row][i]) === event.key) {
+                newSudokuObj.showWrong.add(row * 9 + i);
+              }
+              if (String(newSudokuObj.board[i][col]) === event.key) {
+                newSudokuObj.showWrong.add(i * 9 + col);
+              }
             }
-            setSudokuObj(newSudokuObj);
-            return newSet;
-          });
+            const boxRow = Math.floor(row / 3) * 3;
+            const boxCol = Math.floor(col / 3) * 3;
+            const foundInBox = false;
+            for (let j = boxRow; j < boxRow + 3; ++j) {
+              for (let k = boxCol; k < boxCol + 3; ++k) {
+                if (String(newSudokuObj.board[j][k]) === event.key) {
+                  newSudokuObj.showWrong.add(j * 9 + k);
+                }
+              }
+              if (foundInBox) {
+                break;
+              }
+            }
+          }
         } else {
           // FILL IN NUMBER OR ERASE FILL IN NUMBER
           // clear
           setNotes(new Set());
           newSudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
-          const row = Math.floor(boxNum / 9);
-          const col = boxNum % 9;
           if (String(newSudokuObj.board[row][col]) === event.key) {
             alert("RIGHT ONE!");
             newSudokuObj.revealed.add(boxNum);
             newSudokuObj.valueToAmountLeft[Number(event.key)] -= 1;
             newSudokuObj.amountOfBoxesLeft--;
+            onClick();
           } else {
             alert("WRONG ONE");
             newSudokuObj.removeLife();
@@ -74,7 +100,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
               }
             }
             const boxRow = Math.floor(row / 3) * 3;
-            const boxCol = Math.floor(row / 3) * 3;
+            const boxCol = Math.floor(col / 3) * 3;
             const foundInBox = false;
             for (let j = boxRow; j < boxRow + 3; ++j) {
               for (let k = boxCol; k < boxCol + 3; ++k) {

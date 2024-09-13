@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import "./overlay.css";
@@ -7,8 +7,9 @@ import { Sudoku, SudokuDifficulty } from "./utility/Sudoku";
 
 function App() {
   const [sudokuObj, setSodukuObj] = useState<Sudoku>(
-    new Sudoku(SudokuDifficulty.Hard)
+    new Sudoku(SudokuDifficulty.Easy)
   );
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   const continueGame = () => {
     const newSudokuObj = new Sudoku(sudokuObj.difficulty);
@@ -30,7 +31,12 @@ function App() {
     setSodukuObj(newSudokuObj);
     setGameOver(false);
   };
-  const [gameOver, setGameOver] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (sudokuObj.lives <= 0) {
+      setGameOver(true);
+    }
+  }, [sudokuObj.lives, setGameOver]);
   return (
     <div className="App">
       {gameOver && (
