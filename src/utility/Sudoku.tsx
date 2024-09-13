@@ -133,6 +133,8 @@ export class Sudoku {
   lives: number;
   amountOfBoxesLeft: number;
   valueToAmountLeft: { [key: number]: number };
+  highlightedNumbers: Set<number>;
+  highlightedBoxes: Set<number>;
 
   constructor(diffuculty: SudokuDifficulty) {
     this.board = generateSudoku();
@@ -153,6 +155,9 @@ export class Sudoku {
       9: 9,
     };
     this.amountOfBoxesLeft = 81;
+    this.highlightedBoxes = new Set<number>();
+    this.highlightedNumbers = new Set<number>();
+
     // inital values left
     this.determineValuesLeft();
   }

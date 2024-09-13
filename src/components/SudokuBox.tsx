@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Sudoku } from "../utility/Sudoku";
 import "../SudokuBox.css";
 import "../SudokuBoard.css";
-import { stringify } from "querystring";
-import { BreakfastDiningOutlined } from "@mui/icons-material";
 
 interface SudokuBoxProps {
   isSelected: boolean;
@@ -12,6 +10,8 @@ interface SudokuBoxProps {
   setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
   boxNum: number;
   noteMode: boolean;
+  isBoxHighlight: boolean;
+  isNumHighlight: boolean;
 }
 
 const SudokuBox: React.FC<SudokuBoxProps> = ({
@@ -21,6 +21,8 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   setSudokuObj,
   boxNum,
   noteMode,
+  isBoxHighlight,
+  isNumHighlight,
 }) => {
   const [notes, setNotes] = useState<Set<string>>(new Set());
   // const [filledIn, setFilled] = useState<string | null>(null);
@@ -100,13 +102,17 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     sudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
   }
   let noteSet = sudokuObj.notes[JSON.stringify(boxNum)];
-  const clsName = "sudoku-box";
+  const classNames = [
+    "sudoku-box",
+    isBoxHighlight && "box-highlight",
+    isSelected && "active",
+    isNumHighlight && "num-highlight",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const showNotes = noteMode || noteSet.size > 0;
   return (
-    <button
-      className={`${clsName} ${isSelected ? "active" : ""}`}
-      onClick={onClick}
-    >
+    <button className={classNames} onClick={onClick}>
       {" "}
       {showNotes ? (
         Array.from({ length: 9 }, (_, i) => (

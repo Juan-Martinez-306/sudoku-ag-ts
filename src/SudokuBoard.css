@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat&display=swap');
+
+
 .sudoku-grid {
     display: grid;
     grid-template-columns: repeat(9, 40px);
@@ -5,6 +8,8 @@
     gap: 0px;
     max-width: 360px;
     margin: auto;
+    font-family: 'Caveat';
+
 }
 
 .sudoku-row {
@@ -19,6 +24,7 @@
     background-color: white;
     border: 1px solid #ccc;
     box-sizing: border-box;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 .sudoku-number {
     display: flex;
@@ -26,13 +32,23 @@
     font-size: 20px;
 }
 
-.active {
-    background-color: aqua;
+.box-highlight {
+  background: linear-gradient(135deg, rgba(200, 200, 200, 0.3), rgba(200, 200, 200, 0.1));
+  box-shadow: 0 0 10px rgba(200, 200, 200, 0.5);
 }
 
 .wrong-highlight {
-    background-color: red;
-    border: 1px solid red;
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.1));
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.num-highlight {
+  background: linear-gradient(135deg, rgba(0, 0, 2550, 0.3), rgba(0, 0, 255, 0.1));
+  box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+}
+.active {
+    background-color: rgba(0, 213, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 213, 255, 0.5);
 }
 
 .horizontal-row {
