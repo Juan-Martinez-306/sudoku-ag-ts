@@ -87,6 +87,21 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
       <div>
         <span>{"Lives = " + String(sudokuObj.lives)}</span>
       </div>
+      <div>
+        <span>{"Values Left "}</span>
+        <div className="horizontal-row">
+          {Array.from({ length: 9 }).map((_, index) => (
+            <div>
+              {String(index + 1) +
+                ":" +
+                String(sudokuObj.valueToAmountLeft[index + 1])}
+            </div>
+          ))}
+        </div>
+        <span>
+          {"Total Values Left = " + String(sudokuObj.amountOfBoxesLeft)}
+        </span>
+      </div>
     </div>
   );
 };

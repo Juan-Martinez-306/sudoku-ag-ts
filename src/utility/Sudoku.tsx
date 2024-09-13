@@ -136,6 +136,8 @@ export class Sudoku {
   showWrong: Set<number>;
   difficulty: SudokuDifficulty;
   lives: number;
+  amountOfBoxesLeft: number;
+  valueToAmountLeft: { [key: number]: number };
 
   constructor(diffuculty: SudokuDifficulty) {
     this.board = generateSudoku();
@@ -145,12 +147,35 @@ export class Sudoku {
     this.notes = {};
     this.showWrong = new Set<number>();
     this.lives = 5 - this.difficulty * 2;
+    this.valueToAmountLeft = {
+      1: 9,
+      2: 9,
+      3: 9,
+      4: 9,
+      5: 9,
+      6: 9,
+      7: 9,
+      8: 9,
+      9: 9,
+    };
+    this.amountOfBoxesLeft = 81;
+    // inital values left
+    this.determineValuesLeft();
   }
 
   getElementAtBoxNum(boxNum: number) {
     const row = Math.floor(boxNum / 9);
     const col = boxNum % 9;
     return this.board[row][col];
+  }
+
+  determineValuesLeft() {
+    for (let i = 0; i < this.revealed.length; ++i) {
+      const position = this.revealed[i];
+      const valueAtPosition = this.board[position[0]][position[1]];
+      this.valueToAmountLeft[valueAtPosition] -= 1;
+      this.amountOfBoxesLeft--;
+    }
   }
 
   removeLife() {

@@ -63,6 +63,8 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
             alert("RIGHT ONE!");
             setFilled(event.key);
             newSudokuObj.filledIn[JSON.stringify(boxNum)] = event.key;
+            newSudokuObj.valueToAmountLeft[Number(event.key)] -= 1;
+            newSudokuObj.amountOfBoxesLeft--;
           } else {
             alert("WRONG ONE");
             newSudokuObj.removeLife();

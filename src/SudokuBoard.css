@@ -34,6 +34,15 @@
     background-color: red;
     border: 1px solid red;
 }
+
+.horizontal-row {
+    display: flex;
+    justify-content: center;
+}
+.horizontal-row > div {
+    margin: 5px;
+}
+
 /* vertical lines */
 .sudoku-cell:nth-child(3n+4) {
     border-left: 3px solid black;
