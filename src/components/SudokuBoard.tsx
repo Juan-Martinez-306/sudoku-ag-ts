@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sudoku, tupleEquals } from "../utility/Sudoku";
+import { Sudoku } from "../utility/Sudoku";
 import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 export interface SudokuBoardProps {
@@ -47,9 +47,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
         {board.map((row, rowIndex) => (
           <div key={rowIndex} className="sudoku-row">
             {row.map((value, colIndex) =>
-              sudokuObj.revealed.find((tuple) =>
-                tupleEquals(tuple, [rowIndex, colIndex])
-              ) ? (
+              sudokuObj.revealed.has(rowsColsToBoxNum(rowIndex, colIndex)) ? (
                 <div
                   key={colIndex}
                   className={`sudoku-cell ${

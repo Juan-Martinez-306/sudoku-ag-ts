@@ -23,7 +23,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   noteMode,
 }) => {
   const [notes, setNotes] = useState<Set<string>>(new Set());
-  const [filledIn, setFilled] = useState<string | null>(null);
+  // const [filledIn, setFilled] = useState<string | null>(null);
   useEffect(() => {
     if (!isSelected) {
       sudokuObj.showWrong = new Set<number>();
@@ -31,11 +31,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     }
     const handleKeyPress = (event: KeyboardEvent) => {
       // only accept numerical key presses
-      if (
-        sudokuObj.filledIn[JSON.stringify(boxNum)] === "" &&
-        event.key >= "1" &&
-        event.key <= "9"
-      ) {
+      if (event.key >= "1" && event.key <= "9") {
         const newSudokuObj = new Sudoku(sudokuObj.difficulty);
         Object.assign(newSudokuObj, sudokuObj);
 
@@ -61,8 +57,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
           const col = boxNum % 9;
           if (String(newSudokuObj.board[row][col]) === event.key) {
             alert("RIGHT ONE!");
-            setFilled(event.key);
-            newSudokuObj.filledIn[JSON.stringify(boxNum)] = event.key;
+            newSudokuObj.revealed.add(boxNum);
             newSudokuObj.valueToAmountLeft[Number(event.key)] -= 1;
             newSudokuObj.amountOfBoxesLeft--;
           } else {
@@ -104,15 +99,9 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   if (JSON.stringify(boxNum) in sudokuObj.notes !== true) {
     sudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
   }
-  if (JSON.stringify(boxNum) in sudokuObj.filledIn !== true) {
-    sudokuObj.filledIn[JSON.stringify(boxNum)] = "";
-  }
   let noteSet = sudokuObj.notes[JSON.stringify(boxNum)];
-  const clsName =
-    sudokuObj.filledIn[JSON.stringify(boxNum)] === ""
-      ? "sudoku-box"
-      : "sudoku-cell";
-  const showNotes = (noteMode && filledIn === null) || noteSet.size > 0;
+  const clsName = "sudoku-box";
+  const showNotes = noteMode || noteSet.size > 0;
   return (
     <button
       className={`${clsName} ${isSelected ? "active" : ""}`}
@@ -128,9 +117,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
           </div>
         ))
       ) : (
-        <div className="sudoku-number ">
-          {sudokuObj.filledIn[JSON.stringify(boxNum)]}
-        </div>
+        <div className="sudoku-number ">{}</div>
       )}
     </button>
   );

@@ -21,10 +21,10 @@ function App() {
   const revealBoard = () => {
     const newSudokuObj = new Sudoku(sudokuObj.difficulty);
     Object.assign(newSudokuObj, sudokuObj);
-    newSudokuObj.revealed = [];
+    newSudokuObj.revealed = new Set<number>();
     for (let i = 0; i < 9; ++i) {
       for (let k = 0; k < 9; ++k) {
-        newSudokuObj.revealed.push([i, k]);
+        newSudokuObj.revealed.add(i * 9 + k);
       }
     }
     setSodukuObj(newSudokuObj);

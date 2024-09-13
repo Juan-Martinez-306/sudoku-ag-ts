@@ -1,5 +1,3 @@
-import { Map } from "typescript";
-
 export type tuple = [number, number];
 export function tupleEquals(a: tuple, b: tuple): boolean {
   return a[0] === b[0] && a[1] === b[1];
@@ -100,21 +98,21 @@ function randomSelectionFromBox(
   boxRow: number,
   boxColumn: number,
   randomAmount: number,
-  randomSelection: tuple[]
+  randomSelection: Set<number>
 ) {
   let randomRow: number;
   let randomCol: number;
-  let randomCordinate: tuple;
+  let randomCordinate: number;
   for (let i = 0; i < randomAmount; ++i) {
     do {
       randomRow = shuffleArray([boxRow, boxRow + 1, boxRow + 2])[0];
       randomCol = shuffleArray([boxColumn, boxColumn + 1, boxColumn + 2])[0];
-      randomCordinate = [randomRow, randomCol];
+      randomCordinate = randomRow * 9 + randomCol;
     } while (
       // eslint-disable-next-line no-loop-func
-      randomSelection.find((tuple) => tupleEquals(tuple, randomCordinate))
+      randomSelection.has(randomCordinate)
     );
-    randomSelection.push(randomCordinate);
+    randomSelection.add(randomCordinate);
   }
 }
 
@@ -126,10 +124,7 @@ export enum SudokuDifficulty {
 
 export class Sudoku {
   board: number[][];
-  revealed: tuple[];
-  filledIn: {
-    [key: string]: string;
-  };
+  revealed: Set<number>;
   notes: {
     [key: string]: Set<String>;
   };
@@ -143,7 +138,6 @@ export class Sudoku {
     this.board = generateSudoku();
     this.difficulty = diffuculty;
     this.revealed = this.randomRevealed();
-    this.filledIn = {};
     this.notes = {};
     this.showWrong = new Set<number>();
     this.lives = 5 - this.difficulty * 2;
@@ -170,9 +164,8 @@ export class Sudoku {
   }
 
   determineValuesLeft() {
-    for (let i = 0; i < this.revealed.length; ++i) {
-      const position = this.revealed[i];
-      const valueAtPosition = this.board[position[0]][position[1]];
+    for (const boxNum of this.revealed) {
+      const valueAtPosition = this.getElementAtBoxNum(boxNum);
       this.valueToAmountLeft[valueAtPosition] -= 1;
       this.amountOfBoxesLeft--;
     }
@@ -200,7 +193,7 @@ export class Sudoku {
     const randomNumbers = shuffleArray(
       Array.from({ length: 9 }, (_, i) => i + 1)
     );
-    let randomSelections: tuple[] = [];
+    let randomSelections: Set<number> = new Set<number>();
     let boxNumber = 0;
     let traversed = 0;
     for (let index = 0; index < 5; ++index) {
