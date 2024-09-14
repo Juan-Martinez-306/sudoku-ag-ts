@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Sudoku } from "../utility/Sudoku";
 import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
@@ -25,7 +25,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
   const [noteMode, setNoteMode] = useState<boolean>(false);
 
   const shouldHighlightAsWrong = (boxNum: number) => {
-    console.log("HERE");
+    //console.log("HERE");
     return sudokuObj.showWrong.has(boxNum);
   };
 
@@ -72,8 +72,8 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
           newSudokuObj.highlightedBoxes.add(i * 9 + k);
         }
       }
-      newSudokuObj.highlightedBoxes.delete(boxNum);
-      newSudokuObj.highlightedNumbers.delete(boxNum);
+      //newSudokuObj.highlightedBoxes.delete(boxNum);
+      //newSudokuObj.highlightedNumbers.delete(boxNum);
       setSudokuObj(newSudokuObj);
     }
   };
@@ -148,4 +148,4 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
   );
 };
 
-export default SudokuBoard;
+export default React.memo(SudokuBoard);

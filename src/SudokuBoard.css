@@ -19,12 +19,14 @@
 .sudoku-cell {
     width: 60px;
     height: 60px;
-    text-align: center;
-    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
     background-color: white;
     border: 1px solid #ccc;
+    text-decoration-line: underline;
     box-sizing: border-box;
-    transition: background-color 0.3s, box-shadow 0.3s;
 }
 .sudoku-number {
     display: flex;
@@ -38,17 +40,23 @@
 }
 
 .wrong-highlight {
-  background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.1));
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.1)) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+  transition: background-color 0.3s, box-shadow 0.3s;
+
 }
 
 .num-highlight {
   background: linear-gradient(135deg, rgba(0, 0, 2550, 0.3), rgba(0, 0, 255, 0.1));
   box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+  transition: background-color 0.5s, box-shadow 0.5s;
+
 }
 .active {
     background-color: rgba(0, 213, 255, 0.3);
     box-shadow: 0 0 10px rgba(0, 213, 255, 0.5);
+    transition: background-color 0.5s, box-shadow 0.5s;
+
 }
 
 .horizontal-row {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import "./overlay.css";
@@ -10,6 +10,28 @@ function App() {
     new Sudoku(SudokuDifficulty.Easy)
   );
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [timerSeconds, setTimerSeconds] = useState<number>(0);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Start  timer
+    timerRef.current = window.setInterval(() => {
+      setTimerSeconds((prevTime) => prevTime + 1);
+    }, 1000);
+
+    // clear after done
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  const timerDisplay = useMemo(() => {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  }, [timerSeconds]);
 
   const continueGame = () => {
     const newSudokuObj = new Sudoku(sudokuObj.difficulty);
@@ -54,6 +76,7 @@ function App() {
         setSudokuObj={setSodukuObj}
         setGameOver={setGameOver}
       />
+      <span>Time Elasped: {timerDisplay}</span>
     </div>
   );
 }

@@ -28,10 +28,11 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   // const [filledIn, setFilled] = useState<string | null>(null);
   const row = Math.floor(boxNum / 9);
   const col = boxNum % 9;
-
+  useEffect(() => {
+    sudokuObj.showWrong = new Set<number>();
+  }, [isSelected]);
   useEffect(() => {
     if (!isSelected) {
-      sudokuObj.showWrong = new Set<number>();
       return;
     }
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -55,6 +56,9 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
               return newSet;
             });
           } else {
+            if (newSudokuObj.showWrong.size !== 0) {
+              newSudokuObj.showWrong = new Set<number>();
+            }
             for (let i = 0; i < 9; ++i) {
               if (String(newSudokuObj.board[row][i]) === event.key) {
                 newSudokuObj.showWrong.add(row * 9 + i);
@@ -84,9 +88,17 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
           newSudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
           if (String(newSudokuObj.board[row][col]) === event.key) {
             alert("RIGHT ONE!");
-            newSudokuObj.revealed.add(boxNum);
+            newSudokuObj.addToRevealed(boxNum, event.key);
             newSudokuObj.valueToAmountLeft[Number(event.key)] -= 1;
             newSudokuObj.amountOfBoxesLeft--;
+            if (newSudokuObj.highlightedNumbers.size > 0) {
+              const values = Array.from(newSudokuObj.highlightedNumbers);
+
+              const highlightedNum = newSudokuObj.getElementAtBoxNum(values[0]);
+              if (newSudokuObj.board[row][col] === highlightedNum) {
+                newSudokuObj.highlightedNumbers.add(boxNum);
+              }
+            }
             onClick();
           } else {
             alert("WRONG ONE");

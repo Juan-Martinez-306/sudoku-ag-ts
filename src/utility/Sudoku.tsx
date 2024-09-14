@@ -158,6 +158,7 @@ export class Sudoku {
   valueToAmountLeft: { [key: number]: number };
   highlightedNumbers: Set<number>;
   highlightedBoxes: Set<number>;
+  selectedBoxNum: number;
 
   constructor(diffuculty: SudokuDifficulty) {
     this.board = generateSudoku();
@@ -183,6 +184,8 @@ export class Sudoku {
 
     // inital values left
     this.determineValuesLeft();
+
+    this.selectedBoxNum = -1;
   }
 
   getElementAtBoxNum(boxNum: number) {
@@ -203,6 +206,20 @@ export class Sudoku {
       }
     }
     return true;
+  }
+
+  addToRevealed(boxNum: number, value: String) {
+    this.revealed.add(boxNum);
+    for (const k in this.notes) {
+      if (
+        areInSameSudokuBox(boxNum, Number(k)) ||
+        areInSameSudokuRowOrCol(boxNum, Number(k))
+      ) {
+        if (this.notes[k].has(value)) {
+          this.notes[k].delete(value);
+        }
+      }
+    }
   }
   determineValuesLeft() {
     for (const boxNum of this.revealed) {
