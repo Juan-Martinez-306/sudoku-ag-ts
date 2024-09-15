@@ -5,10 +5,10 @@ import "../SudokuBoard.css";
 
 interface SudokuBoxProps {
   isSelected: boolean;
-  onClick: () => void;
   sudokuObj: Sudoku;
   setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
   boxNum: number;
+  highlightFunction: (cv: number, bn: number) => void;
   noteMode: boolean;
   isBoxHighlight: boolean;
   isNumHighlight: boolean;
@@ -16,21 +16,19 @@ interface SudokuBoxProps {
 
 const SudokuBox: React.FC<SudokuBoxProps> = ({
   isSelected,
-  onClick,
   sudokuObj,
   setSudokuObj,
   boxNum,
+  highlightFunction,
   noteMode,
   isBoxHighlight,
   isNumHighlight,
 }) => {
-  const [notes, setNotes] = useState<Set<string>>(new Set());
   // const [filledIn, setFilled] = useState<string | null>(null);
-  const row = Math.floor(boxNum / 9);
-  const col = boxNum % 9;
   useEffect(() => {
     sudokuObj.showWrong = new Set<number>();
   }, [isSelected]);
+
   useEffect(() => {
     if (!isSelected) {
       return;
@@ -42,90 +40,20 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
         Object.assign(newSudokuObj, sudokuObj);
 
         if (noteMode) {
-          if (newSudokuObj.isNoteValidInBoxNum(boxNum, Number(event.key))) {
-            setNotes((prevNotes) => {
-              const newSet = new Set(prevNotes);
-              if (newSet.has(event.key)) {
-                newSet.delete(event.key);
-                newSudokuObj.notes[JSON.stringify(boxNum)].delete(event.key);
-              } else {
-                newSet.add(event.key);
-                newSudokuObj.notes[JSON.stringify(boxNum)].add(event.key);
-              }
-              setSudokuObj(newSudokuObj);
-              return newSet;
-            });
-          } else {
-            if (newSudokuObj.showWrong.size !== 0) {
-              newSudokuObj.showWrong = new Set<number>();
-            }
-            for (let i = 0; i < 9; ++i) {
-              if (String(newSudokuObj.board[row][i]) === event.key) {
-                newSudokuObj.showWrong.add(row * 9 + i);
-              }
-              if (String(newSudokuObj.board[i][col]) === event.key) {
-                newSudokuObj.showWrong.add(i * 9 + col);
-              }
-            }
-            const boxRow = Math.floor(row / 3) * 3;
-            const boxCol = Math.floor(col / 3) * 3;
-            const foundInBox = false;
-            for (let j = boxRow; j < boxRow + 3; ++j) {
-              for (let k = boxCol; k < boxCol + 3; ++k) {
-                if (String(newSudokuObj.board[j][k]) === event.key) {
-                  newSudokuObj.showWrong.add(j * 9 + k);
-                }
-              }
-              if (foundInBox) {
-                break;
-              }
-            }
-          }
+          newSudokuObj.handleNoteAtBoxNum(boxNum, event.key);
         } else {
           // FILL IN NUMBER OR ERASE FILL IN NUMBER
           // clear
-          setNotes(new Set());
           newSudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
-          if (String(newSudokuObj.board[row][col]) === event.key) {
+          if (String(newSudokuObj.getElementAtBoxNum(boxNum)) === event.key) {
             alert("RIGHT ONE!");
             newSudokuObj.addToRevealed(boxNum, event.key);
-            newSudokuObj.valueToAmountLeft[Number(event.key)] -= 1;
-            newSudokuObj.amountOfBoxesLeft--;
-            if (newSudokuObj.highlightedNumbers.size > 0) {
-              const values = Array.from(newSudokuObj.highlightedNumbers);
-
-              const highlightedNum = newSudokuObj.getElementAtBoxNum(values[0]);
-              if (newSudokuObj.board[row][col] === highlightedNum) {
-                newSudokuObj.highlightedNumbers.add(boxNum);
-              }
-            }
-            onClick();
           } else {
             alert("WRONG ONE");
-            newSudokuObj.removeLife();
-            for (let i = 0; i < 9; ++i) {
-              if (String(newSudokuObj.board[row][i]) === event.key) {
-                newSudokuObj.showWrong.add(row * 9 + i);
-              }
-              if (String(newSudokuObj.board[i][col]) === event.key) {
-                newSudokuObj.showWrong.add(i * 9 + col);
-              }
-            }
-            const boxRow = Math.floor(row / 3) * 3;
-            const boxCol = Math.floor(col / 3) * 3;
-            const foundInBox = false;
-            for (let j = boxRow; j < boxRow + 3; ++j) {
-              for (let k = boxCol; k < boxCol + 3; ++k) {
-                if (String(newSudokuObj.board[j][k]) === event.key) {
-                  newSudokuObj.showWrong.add(j * 9 + k);
-                }
-              }
-              if (foundInBox) {
-                break;
-              }
-            }
+            newSudokuObj.handleWrongGuess(boxNum, event.key);
           }
         }
+
         setSudokuObj(newSudokuObj);
       }
     };
@@ -134,8 +62,9 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isSelected, notes, noteMode, sudokuObj, setSudokuObj, boxNum]);
+  }, [isSelected, noteMode, sudokuObj, setSudokuObj, boxNum]);
 
+  //noteMode, sudokuObj, setSudokuObj, boxNum
   if (JSON.stringify(boxNum) in sudokuObj.notes !== true) {
     sudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
   }
@@ -150,7 +79,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     .join(" ");
   const showNotes = noteMode || noteSet.size > 0;
   return (
-    <button className={classNames} onClick={onClick}>
+    <button className={classNames} onClick={() => highlightFunction(0, boxNum)}>
       {" "}
       {showNotes ? (
         Array.from({ length: 9 }, (_, i) => (
@@ -167,4 +96,4 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   );
 };
 
-export default SudokuBox;
+export default React.memo(SudokuBox);

@@ -71,11 +71,7 @@ function App() {
           </div>
         </div>
       )}
-      <SudokuBoard
-        sudokuObj={sudokuObj}
-        setSudokuObj={setSodukuObj}
-        setGameOver={setGameOver}
-      />
+      <SudokuBoard sudokuObj={sudokuObj} setSudokuObj={setSodukuObj} />
       <span>Time Elasped: {timerDisplay}</span>
     </div>
   );

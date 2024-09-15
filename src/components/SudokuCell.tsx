@@ -41,4 +41,4 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   );
 };
 
-export default SudokuCell;
+export default React.memo(SudokuCell);

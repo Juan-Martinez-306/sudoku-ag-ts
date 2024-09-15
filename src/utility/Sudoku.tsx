@@ -1,5 +1,4 @@
-export type tuple = [number, number];
-export function tupleEquals(a: tuple, b: tuple): boolean {
+export function tupleEquals(a: number[], b: number[]): boolean {
   return a[0] === b[0] && a[1] === b[1];
 }
 function isValid(
@@ -93,16 +92,18 @@ function shuffleArray(array: number[]): number[] {
   }
   return array;
 }
-
+const getRowCol = (boxNum: number) => {
+  const row = Math.floor(boxNum / 9);
+  const col = boxNum % 9;
+  return { row, col };
+};
+const getCorner = (boxNum: number) => {
+  const cord = getRowCol(boxNum);
+  const boxRow = Math.floor(cord.row / 3) * 3;
+  const boxCol = Math.floor(cord.col / 3) * 3;
+  return { boxRow, boxCol };
+};
 const areInSameSudokuBox = (bx1: number, bx2: number) => {
-  const getCorner = (boxNum: number) => {
-    const row = Math.floor(boxNum / 9);
-    const col = boxNum % 9;
-    const boxRow = Math.floor(row / 3) * 3;
-    const boxCol = Math.floor(col / 3) * 3;
-    return { boxRow, boxCol };
-  };
-
   const box1Corner = getCorner(bx1);
   const box2Corner = getCorner(bx2);
 
@@ -165,6 +166,9 @@ export class Sudoku {
     this.difficulty = diffuculty;
     this.revealed = this.randomRevealed();
     this.notes = {};
+    for (let i = 0; i < 81; ++i) {
+      this.notes[JSON.stringify(i)] = new Set<String>();
+    }
     this.showWrong = new Set<number>();
     this.lives = 5 - this.difficulty * 2;
     this.valueToAmountLeft = {
@@ -189,27 +193,15 @@ export class Sudoku {
   }
 
   getElementAtBoxNum(boxNum: number) {
-    const row = Math.floor(boxNum / 9);
-    const col = boxNum % 9;
-    return this.board[row][col];
-  }
-
-  isNoteValidInBoxNum(boxNum: number, note: number) {
-    for (const boxNum2 of this.revealed) {
-      if (
-        areInSameSudokuBox(boxNum, boxNum2) ||
-        areInSameSudokuRowOrCol(boxNum, boxNum2)
-      ) {
-        if (this.getElementAtBoxNum(boxNum2) === note) {
-          return false;
-        }
-      }
-    }
-    return true;
+    const cord = getRowCol(boxNum);
+    return this.board[cord.row][cord.col];
   }
 
   addToRevealed(boxNum: number, value: String) {
+    // Box at boxnum is now revealed
     this.revealed.add(boxNum);
+
+    // Remove impossible notes
     for (const k in this.notes) {
       if (
         areInSameSudokuBox(boxNum, Number(k)) ||
@@ -220,6 +212,46 @@ export class Sudoku {
         }
       }
     }
+
+    // Recalc value counts
+    this.valueToAmountLeft[Number(value)] -= 1;
+    this.amountOfBoxesLeft--;
+
+    // If number added is part of highlightedNumbers, highlight the added value asWell
+    if (this.highlightedNumbers.size > 0) {
+      const values = Array.from(this.highlightedNumbers);
+
+      const highlightedNum = this.getElementAtBoxNum(values[0]);
+      if (this.getElementAtBoxNum(boxNum) === highlightedNum) {
+        this.highlightedNumbers.add(boxNum);
+      }
+    }
+  }
+
+  handleUpdateShowWrong(boxNum: number, note: String) {
+    let temp_wrong = new Set<number>();
+    for (const boxNum2 of this.revealed) {
+      if (
+        areInSameSudokuBox(boxNum, boxNum2) ||
+        areInSameSudokuRowOrCol(boxNum, boxNum2)
+      ) {
+        if (this.getElementAtBoxNum(boxNum2) === Number(note)) {
+          temp_wrong.add(boxNum2);
+        }
+      }
+    }
+    this.showWrong = temp_wrong;
+  }
+
+  handleNoteAtBoxNum(boxNum: number, note: String) {
+    // handle new showWrong
+    this.handleUpdateShowWrong(boxNum, note);
+    // If no conflicting numbers add or delete note
+    if (this.showWrong.size === 0) {
+      this.notes[JSON.stringify(boxNum)].has(note)
+        ? this.notes[JSON.stringify(boxNum)].delete(note)
+        : this.notes[JSON.stringify(boxNum)].add(note);
+    }
   }
   determineValuesLeft() {
     for (const boxNum of this.revealed) {
@@ -227,6 +259,31 @@ export class Sudoku {
       this.valueToAmountLeft[valueAtPosition] -= 1;
       this.amountOfBoxesLeft--;
     }
+  }
+
+  highlightNumbersEqualToValue(value: number) {
+    for (const boxN of this.revealed) {
+      if (this.getElementAtBoxNum(boxN) === value) {
+        this.highlightedNumbers.add(boxN);
+      }
+    }
+  }
+  highlightBoxesAdjacentToBoxes(row: number, col: number) {
+    for (let i = 0; i < 9; i++) {
+      this.highlightedBoxes.add(row * 9 + i);
+      this.highlightedBoxes.add(i * 9 + col);
+    }
+    const boxRow = 3 * Math.floor(row / 3);
+    const boxColumn = 3 * Math.floor(col / 3);
+    for (let i = boxRow; i < boxRow + 3; i++) {
+      for (let k = boxColumn; k < boxColumn + 3; k++) {
+        this.highlightedBoxes.add(i * 9 + k);
+      }
+    }
+  }
+  handleWrongGuess(boxNum: number, value: String) {
+    this.removeLife();
+    this.handleUpdateShowWrong(boxNum, value);
   }
 
   removeLife() {

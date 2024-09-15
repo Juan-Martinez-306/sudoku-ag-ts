@@ -6,7 +6,6 @@ import SudokuCell from "./SudokuCell";
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
   setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
-  setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const getBoxNum = (row: number, col: number) => {
@@ -16,7 +15,6 @@ const getBoxNum = (row: number, col: number) => {
 const SudokuBoard: React.FC<SudokuBoardProps> = ({
   sudokuObj,
   setSudokuObj,
-  setGameOver,
 }) => {
   const [board, setBoard] = useState<string[][]>(
     Array.from({ length: 9 }, () => Array(9).fill(""))
@@ -29,17 +27,11 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
     return sudokuObj.showWrong.has(boxNum);
   };
 
-  useEffect(() => {
-    if (sudokuObj.lives <= 0) {
-      setGameOver(true);
-    }
-  }, [sudokuObj.lives, setGameOver]);
-
-  const handleBoxClick = (row: number, col: number) => {
-    if (selectedBox === getBoxNum(row, col)) {
+  const handleBoxClick = (boxNum: number) => {
+    if (selectedBox === boxNum) {
       setSelectedBox(-1);
     } else {
-      setSelectedBox(getBoxNum(row, col));
+      setSelectedBox(boxNum);
     }
   };
 
@@ -48,33 +40,21 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
     Object.assign(newSudokuObj, sudokuObj);
     newSudokuObj.highlightedNumbers.clear();
     newSudokuObj.highlightedBoxes.clear();
-    if (sudokuValue < 1 || sudokuValue > 9) {
+    if (sudokuValue < 0 || sudokuValue > 9) {
       console.log("INVALID VALUE");
       setSudokuObj(newSudokuObj);
       return;
     } else {
+      // CLICK ON A CELL ONLY
+      if (sudokuValue !== 0) {
+        newSudokuObj.highlightNumbersEqualToValue(sudokuValue);
+      }
+      // EVERY TIME
       const row = Math.floor(boxNum / 9);
       const col = boxNum % 9;
-      handleBoxClick(row, col);
-      for (const boxN of sudokuObj.revealed) {
-        if (sudokuObj.getElementAtBoxNum(boxN) === sudokuValue) {
-          newSudokuObj.highlightedNumbers.add(boxN);
-        }
-      }
-      for (let i = 0; i < 9; i++) {
-        newSudokuObj.highlightedBoxes.add(row * 9 + i);
-        newSudokuObj.highlightedBoxes.add(i * 9 + col);
-      }
-      const boxRow = 3 * Math.floor(row / 3);
-      const boxColumn = 3 * Math.floor(col / 3);
-      for (let i = boxRow; i < boxRow + 3; i++) {
-        for (let k = boxColumn; k < boxColumn + 3; k++) {
-          newSudokuObj.highlightedBoxes.add(i * 9 + k);
-        }
-      }
-      //newSudokuObj.highlightedBoxes.delete(boxNum);
-      //newSudokuObj.highlightedNumbers.delete(boxNum);
+      newSudokuObj.highlightBoxesAdjacentToBoxes(row, col);
       setSudokuObj(newSudokuObj);
+      handleBoxClick(boxNum);
     }
   };
   return (
@@ -106,10 +86,10 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
                 <SudokuBox
                   key={boxNum}
                   isSelected={isSelected}
-                  onClick={() => handleBoxClick(rowIndex, colIndex)}
                   sudokuObj={sudokuObj}
                   setSudokuObj={setSudokuObj}
                   boxNum={boxNum}
+                  highlightFunction={handleHighlight}
                   noteMode={noteMode}
                   isBoxHighlight={isBoxHighlight}
                   isNumHighlight={isNumHighlight}
