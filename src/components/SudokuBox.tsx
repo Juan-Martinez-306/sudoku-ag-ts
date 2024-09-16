@@ -68,7 +68,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   if (JSON.stringify(boxNum) in sudokuObj.notes !== true) {
     sudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
   }
-  let noteSet = sudokuObj.notes[JSON.stringify(boxNum)];
+  const noteSet = sudokuObj.notes[JSON.stringify(boxNum)];
   const classNames = [
     "sudoku-box",
     isBoxHighlight && "box-highlight",

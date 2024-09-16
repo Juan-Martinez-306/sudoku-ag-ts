@@ -144,6 +144,7 @@ export enum SudokuDifficulty {
   Easy = 0,
   Medium = 1,
   Hard = 2,
+  Debug = -1,
 }
 
 export class Sudoku {
@@ -248,6 +249,7 @@ export class Sudoku {
     this.handleUpdateShowWrong(boxNum, note);
     // If no conflicting numbers add or delete note
     if (this.showWrong.size === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.notes[JSON.stringify(boxNum)].has(note)
         ? this.notes[JSON.stringify(boxNum)].delete(note)
         : this.notes[JSON.stringify(boxNum)].add(note);
@@ -302,6 +304,9 @@ export class Sudoku {
         break;
       case SudokuDifficulty.Hard:
         revealAmounts = [0, 2, 2, 2, 3];
+        break;
+      case SudokuDifficulty.Debug:
+        revealAmounts = [9, 0, 0, 0, 0];
         break;
     }
 

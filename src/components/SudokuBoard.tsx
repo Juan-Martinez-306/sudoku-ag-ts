@@ -1,8 +1,10 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState, useCallback } from "react";
 import { Sudoku } from "../utility/Sudoku";
 import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 import SudokuCell from "./SudokuCell";
+import SudokuCountTable from "./SudokuNumber";
+
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
   setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
@@ -16,47 +18,66 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
   sudokuObj,
   setSudokuObj,
 }) => {
-  const [board, setBoard] = useState<string[][]>(
+  const [board] = useState<string[][]>(
     Array.from({ length: 9 }, () => Array(9).fill(""))
   );
   const [selectedBox, setSelectedBox] = useState<number>(-1);
   const [noteMode, setNoteMode] = useState<boolean>(false);
 
-  const shouldHighlightAsWrong = (boxNum: number) => {
-    //console.log("HERE");
-    return sudokuObj.showWrong.has(boxNum);
-  };
+  const shouldHighlightAsWrong = useCallback(
+    (boxNum: number) => {
+      return sudokuObj.showWrong.has(boxNum);
+    },
+    [sudokuObj]
+  );
 
-  const handleBoxClick = (boxNum: number) => {
-    if (selectedBox === boxNum) {
-      setSelectedBox(-1);
-    } else {
-      setSelectedBox(boxNum);
-    }
-  };
+  const handleBoxClick = useCallback((boxNum: number) => {
+    setSelectedBox((prevSelectedBox) =>
+      prevSelectedBox === boxNum ? -1 : boxNum
+    );
+  }, []);
 
-  const handleHighlight = (sudokuValue: number, boxNum: number) => {
-    const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-    Object.assign(newSudokuObj, sudokuObj);
-    newSudokuObj.highlightedNumbers.clear();
-    newSudokuObj.highlightedBoxes.clear();
-    if (sudokuValue < 0 || sudokuValue > 9) {
-      console.log("INVALID VALUE");
-      setSudokuObj(newSudokuObj);
-      return;
-    } else {
+  const handleHighlight = useCallback(
+    (sudokuValue: number, boxNum: number) => {
+      if (sudokuValue < 0 || sudokuValue > 9) {
+        console.log("INVALID VALUE");
+        return;
+      }
+      const newSudokuObj = new Sudoku(sudokuObj.difficulty);
+      Object.assign(newSudokuObj, sudokuObj);
+      newSudokuObj.highlightedNumbers.clear();
+      newSudokuObj.highlightedBoxes.clear();
       // CLICK ON A CELL ONLY
       if (sudokuValue !== 0) {
         newSudokuObj.highlightNumbersEqualToValue(sudokuValue);
       }
-      // EVERY TIME
-      const row = Math.floor(boxNum / 9);
-      const col = boxNum % 9;
-      newSudokuObj.highlightBoxesAdjacentToBoxes(row, col);
+      // EVERY TIME WHEN NORMAL BOX ( NOT ON SIMPLE)
+      if (boxNum >= 0 && boxNum < 81) {
+        const row = Math.floor(boxNum / 9);
+        const col = boxNum % 9;
+        newSudokuObj.highlightBoxesAdjacentToBoxes(row, col);
+      }
       setSudokuObj(newSudokuObj);
       handleBoxClick(boxNum);
-    }
-  };
+    },
+    [sudokuObj, setSudokuObj, handleBoxClick]
+  );
+
+  const higlightNumbers = useCallback(
+    (sudokuValue: number) => {
+      if (sudokuValue < 0 || sudokuValue > 9) {
+        console.log("INVALID VALUE");
+        return;
+      }
+      const newSudokuObj = new Sudoku(sudokuObj.difficulty);
+      Object.assign(newSudokuObj, sudokuObj);
+      newSudokuObj.highlightedNumbers.clear();
+      newSudokuObj.highlightNumbersEqualToValue(sudokuValue);
+      setSudokuObj(newSudokuObj);
+    },
+    [sudokuObj, setSudokuObj]
+  );
+
   return (
     <div>
       <div className="sudoku-grid">
@@ -112,13 +133,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
       <div>
         <span>{"Values Left "}</span>
         <div className="horizontal-row">
-          {Array.from({ length: 9 }).map((_, index) => (
-            <div>
-              {String(index + 1) +
-                ":" +
-                String(sudokuObj.valueToAmountLeft[index + 1])}
-            </div>
-          ))}
+          <SudokuCountTable valueToAmountObj={sudokuObj.valueToAmountLeft} />
         </div>
         <span>
           {"Total Values Left = " + String(sudokuObj.amountOfBoxesLeft)}

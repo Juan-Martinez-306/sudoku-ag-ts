@@ -7,9 +7,10 @@ import { Sudoku, SudokuDifficulty } from "./utility/Sudoku";
 
 function App() {
   const [sudokuObj, setSodukuObj] = useState<Sudoku>(
-    new Sudoku(SudokuDifficulty.Easy)
+    new Sudoku(SudokuDifficulty.Debug)
   );
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [winScreen, setWinScreen] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const timerRef = useRef<number | null>(null);
 
@@ -59,6 +60,12 @@ function App() {
       setGameOver(true);
     }
   }, [sudokuObj.lives, setGameOver]);
+
+  useEffect(() => {
+    if (sudokuObj.amountOfBoxesLeft === 0) {
+      setWinScreen(true);
+    }
+  }, [sudokuObj.amountOfBoxesLeft]);
   return (
     <div className="App">
       {gameOver && (
@@ -68,6 +75,13 @@ function App() {
             <button onClick={() => window.location.reload()}>Restart</button>
             <button onClick={continueGame}>Continue</button>
             <button onClick={revealBoard}>Reveal Board</button>
+          </div>
+        </div>
+      )}
+      {winScreen && (
+        <div className="overlay">
+          <div className="overlay-content">
+            <h1>You Won!</h1>
           </div>
         </div>
       )}
