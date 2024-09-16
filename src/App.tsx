@@ -3,24 +3,23 @@ import logo from "./logo.svg";
 import "./App.css";
 import "./overlay.css";
 import SudokuBoard from "./components/SudokuBoard";
+import { SudokuProvider, useSudoku } from "./hooks/SudokuContext";
 import { Sudoku, SudokuDifficulty } from "./utility/Sudoku";
 
-function App() {
-  const [sudokuObj, setSodukuObj] = useState<Sudoku>(
-    new Sudoku(SudokuDifficulty.Debug)
-  );
+const AppContent: React.FC = () => {
+  const { sudoku, setSudoku } = useSudoku();
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [winScreen, setWinScreen] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Start  timer
+    // Start timer
     timerRef.current = window.setInterval(() => {
       setTimerSeconds((prevTime) => prevTime + 1);
     }, 1000);
 
-    // clear after done
+    // Clear after done
     return () => {
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current);
@@ -35,37 +34,38 @@ function App() {
   }, [timerSeconds]);
 
   const continueGame = () => {
-    const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-    Object.assign(newSudokuObj, sudokuObj);
-    newSudokuObj.lives = 5 - newSudokuObj.difficulty * 2;
-    setSodukuObj(newSudokuObj);
+    const newSudoku = new Sudoku(sudoku.difficulty);
+    Object.assign(newSudoku, sudoku);
+    newSudoku.lives = 5 - newSudoku.difficulty * 2;
+    setSudoku(newSudoku);
     setGameOver(false);
   };
 
   const revealBoard = () => {
-    const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-    Object.assign(newSudokuObj, sudokuObj);
-    newSudokuObj.revealed = new Set<number>();
+    const newSudoku = new Sudoku(sudoku.difficulty);
+    Object.assign(newSudoku, sudoku);
+    newSudoku.revealed = new Set<number>();
     for (let i = 0; i < 9; ++i) {
       for (let k = 0; k < 9; ++k) {
-        newSudokuObj.revealed.add(i * 9 + k);
+        newSudoku.revealed.add(i * 9 + k);
       }
     }
-    setSodukuObj(newSudokuObj);
+    setSudoku(newSudoku);
     setGameOver(false);
   };
 
   useEffect(() => {
-    if (sudokuObj.lives <= 0) {
+    if (sudoku.lives <= 0) {
       setGameOver(true);
     }
-  }, [sudokuObj.lives, setGameOver]);
+  }, [sudoku.lives]);
 
   useEffect(() => {
-    if (sudokuObj.amountOfBoxesLeft === 0) {
+    if (sudoku.amountOfBoxesLeft === 0) {
       setWinScreen(true);
     }
-  }, [sudokuObj.amountOfBoxesLeft]);
+  }, [sudoku.amountOfBoxesLeft]);
+
   return (
     <div className="App">
       {gameOver && (
@@ -85,10 +85,18 @@ function App() {
           </div>
         </div>
       )}
-      <SudokuBoard sudokuObj={sudokuObj} setSudokuObj={setSodukuObj} />
-      <span>Time Elasped: {timerDisplay}</span>
+      <SudokuBoard />
+      <span>Time Elapsed: {timerDisplay}</span>
     </div>
   );
-}
+};
+
+const App: React.FC = () => {
+  return (
+    <SudokuProvider difficulty={SudokuDifficulty.Debug}>
+      <AppContent />
+    </SudokuProvider>
+  );
+};
 
 export default App;

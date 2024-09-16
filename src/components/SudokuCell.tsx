@@ -7,7 +7,7 @@ interface SudokuCellProps {
   cell_value: number;
   wrongValue: boolean;
   boxNum: number;
-  highlightFunction: (cv: number, bn: number) => void;
+  onClickCell: (cv: number, bn: number) => void;
   isBoxHighlight: boolean;
   isNumHighlight: boolean;
 }
@@ -17,7 +17,7 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   wrongValue,
   isSelected,
   boxNum,
-  highlightFunction,
+  onClickCell,
   isBoxHighlight,
   isNumHighlight,
 }) => {
@@ -30,11 +30,12 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   ]
     .filter(Boolean)
     .join(" ");
+
   return (
     <div
       key={boxNum}
       className={classNames}
-      onClick={() => highlightFunction(cell_value, boxNum)}
+      onClick={() => onClickCell(cell_value, boxNum)}
     >
       {cell_value}
     </div>

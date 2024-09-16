@@ -230,7 +230,7 @@ export class Sudoku {
   }
 
   handleUpdateShowWrong(boxNum: number, note: String) {
-    let temp_wrong = new Set<number>();
+    const temp_wrong = new Set<number>();
     for (const boxNum2 of this.revealed) {
       if (
         areInSameSudokuBox(boxNum, boxNum2) ||

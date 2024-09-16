@@ -4,6 +4,8 @@ import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 import SudokuCell from "./SudokuCell";
 import SudokuCountTable from "./SudokuNumber";
+import { useSudoku } from "../hooks/SudokuContext";
+import { clear } from "console";
 
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
@@ -14,103 +16,70 @@ const getBoxNum = (row: number, col: number) => {
   return row * 9 + col;
 };
 
-const SudokuBoard: React.FC<SudokuBoardProps> = ({
-  sudokuObj,
-  setSudokuObj,
-}) => {
-  const [board] = useState<string[][]>(
-    Array.from({ length: 9 }, () => Array(9).fill(""))
-  );
-  const [selectedBox, setSelectedBox] = useState<number>(-1);
-  const [noteMode, setNoteMode] = useState<boolean>(false);
+const SudokuBoard = () => {
+  const {
+    sudoku,
+    handleHighlightNumbers,
+    handleHighlightBoxes,
+    clearHighlights,
+  } = useSudoku();
+  const [selectedBox, setSelectedBox] = useState<number | null>(null);
+  const [noteMode, setNoteMode] = useState(false);
 
-  const shouldHighlightAsWrong = useCallback(
+  function shouldHighlightAsWrong(boxNum: number) {
+    return sudoku.showWrong.has(boxNum);
+  }
+
+  const onClickBox = useCallback(
     (boxNum: number) => {
-      return sudokuObj.showWrong.has(boxNum);
+      setSelectedBox(boxNum);
+      clearHighlights();
+      handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
     },
-    [sudokuObj]
+    [clearHighlights, handleHighlightBoxes]
   );
 
-  const handleBoxClick = useCallback((boxNum: number) => {
-    setSelectedBox((prevSelectedBox) =>
-      prevSelectedBox === boxNum ? -1 : boxNum
-    );
-  }, []);
-
-  const handleHighlight = useCallback(
-    (sudokuValue: number, boxNum: number) => {
-      if (sudokuValue < 0 || sudokuValue > 9) {
-        console.log("INVALID VALUE");
-        return;
-      }
-      const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-      Object.assign(newSudokuObj, sudokuObj);
-      newSudokuObj.highlightedNumbers.clear();
-      newSudokuObj.highlightedBoxes.clear();
-      // CLICK ON A CELL ONLY
-      if (sudokuValue !== 0) {
-        newSudokuObj.highlightNumbersEqualToValue(sudokuValue);
-      }
-      // EVERY TIME WHEN NORMAL BOX ( NOT ON SIMPLE)
-      if (boxNum >= 0 && boxNum < 81) {
-        const row = Math.floor(boxNum / 9);
-        const col = boxNum % 9;
-        newSudokuObj.highlightBoxesAdjacentToBoxes(row, col);
-      }
-      setSudokuObj(newSudokuObj);
-      handleBoxClick(boxNum);
+  const onClickCell = useCallback(
+    (cellValue: number, boxNum: number) => {
+      setSelectedBox(boxNum);
+      clearHighlights();
+      handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
+      handleHighlightNumbers(cellValue);
     },
-    [sudokuObj, setSudokuObj, handleBoxClick]
-  );
-
-  const higlightNumbers = useCallback(
-    (sudokuValue: number) => {
-      if (sudokuValue < 0 || sudokuValue > 9) {
-        console.log("INVALID VALUE");
-        return;
-      }
-      const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-      Object.assign(newSudokuObj, sudokuObj);
-      newSudokuObj.highlightedNumbers.clear();
-      newSudokuObj.highlightNumbersEqualToValue(sudokuValue);
-      setSudokuObj(newSudokuObj);
-    },
-    [sudokuObj, setSudokuObj]
+    [clearHighlights, handleHighlightBoxes, handleHighlightNumbers]
   );
 
   return (
     <div>
       <div className="sudoku-grid">
-        {board.map((row, rowIndex) => (
+        {sudoku.board.map((row, rowIndex) => (
           <div key={rowIndex} className="sudoku-row">
-            {row.map((value, colIndex) => {
+            {row.map((_, colIndex) => {
               const boxNum = getBoxNum(rowIndex, colIndex);
-              const isRevealed = sudokuObj.revealed.has(boxNum);
-              const isBoxHighlight = sudokuObj.highlightedBoxes.has(boxNum);
-              const isNumHighlight = sudokuObj.highlightedNumbers.has(boxNum);
+              const isRevealed = sudoku.revealed.has(boxNum);
+              const isBoxHighlight = sudoku.highlightedBoxes.has(boxNum);
+              const isNumHighlight = sudoku.highlightedNumbers.has(boxNum);
               const wrongValue = shouldHighlightAsWrong(boxNum);
               const isSelected = selectedBox === boxNum;
-              const cell_value = sudokuObj.board[rowIndex][colIndex];
+              const cell_value = sudoku.board[rowIndex][colIndex];
 
               return isRevealed ? (
                 <SudokuCell
-                  key={boxNum}
+                  key={`cell-${boxNum}`}
                   isSelected={isSelected}
                   cell_value={cell_value}
                   wrongValue={wrongValue}
                   boxNum={boxNum}
-                  highlightFunction={handleHighlight}
+                  onClickCell={onClickCell}
                   isBoxHighlight={isBoxHighlight}
                   isNumHighlight={isNumHighlight}
                 />
               ) : (
                 <SudokuBox
-                  key={boxNum}
+                  key={`box-${boxNum}`}
                   isSelected={isSelected}
-                  sudokuObj={sudokuObj}
-                  setSudokuObj={setSudokuObj}
                   boxNum={boxNum}
-                  highlightFunction={handleHighlight}
+                  onClickBox={onClickBox}
                   noteMode={noteMode}
                   isBoxHighlight={isBoxHighlight}
                   isNumHighlight={isNumHighlight}
@@ -128,16 +97,14 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
         Change Note Mode - {String(noteMode)}
       </button>
       <div>
-        <span>{"Lives = " + String(sudokuObj.lives)}</span>
+        <span>{"Lives = " + String(sudoku.lives)}</span>
       </div>
       <div>
         <span>{"Values Left "}</span>
         <div className="horizontal-row">
-          <SudokuCountTable valueToAmountObj={sudokuObj.valueToAmountLeft} />
+          <SudokuCountTable valueToAmountObj={sudoku.valueToAmountLeft} />
         </div>
-        <span>
-          {"Total Values Left = " + String(sudokuObj.amountOfBoxesLeft)}
-        </span>
+        <span>{"Total Values Left = " + String(sudoku.amountOfBoxesLeft)}</span>
       </div>
     </div>
   );

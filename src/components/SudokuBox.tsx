@@ -1,74 +1,72 @@
-import React, { useState, useEffect } from "react";
-import { Sudoku } from "../utility/Sudoku";
+import React, { useEffect, useCallback } from "react";
+import { useSudoku } from "../hooks/SudokuContext";
 import "../SudokuBox.css";
 import "../SudokuBoard.css";
+import { Sudoku } from "../utility/Sudoku";
 
 interface SudokuBoxProps {
   isSelected: boolean;
-  sudokuObj: Sudoku;
-  setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
   boxNum: number;
-  highlightFunction: (cv: number, bn: number) => void;
   noteMode: boolean;
+  onClickBox: (boxNum: number) => void;
   isBoxHighlight: boolean;
   isNumHighlight: boolean;
 }
 
 const SudokuBox: React.FC<SudokuBoxProps> = ({
   isSelected,
-  sudokuObj,
-  setSudokuObj,
   boxNum,
-  highlightFunction,
   noteMode,
+  onClickBox,
   isBoxHighlight,
   isNumHighlight,
 }) => {
-  // const [filledIn, setFilled] = useState<string | null>(null);
+  const { sudoku, setSudoku } = useSudoku();
+
   useEffect(() => {
-    sudokuObj.showWrong = new Set<number>();
+    sudoku.showWrong = new Set<number>();
   }, [isSelected]);
+
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key >= "1" && event.key <= "9") {
+        const newSudoku = new Sudoku(sudoku.difficulty);
+        Object.assign(newSudoku, sudoku);
+
+        if (noteMode) {
+          newSudoku.handleNoteAtBoxNum(boxNum, event.key);
+        } else {
+          newSudoku.notes[JSON.stringify(boxNum)] = new Set<String>();
+          if (String(newSudoku.getElementAtBoxNum(boxNum)) === event.key) {
+            alert("RIGHT ONE!");
+            newSudoku.addToRevealed(boxNum, event.key);
+          } else {
+            alert("WRONG ONE");
+            newSudoku.handleWrongGuess(boxNum, event.key);
+          }
+        }
+
+        setSudoku(newSudoku);
+      }
+    },
+    [noteMode, sudoku, setSudoku, boxNum]
+  );
 
   useEffect(() => {
     if (!isSelected) {
       return;
     }
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // only accept numerical key presses
-      if (event.key >= "1" && event.key <= "9") {
-        const newSudokuObj = new Sudoku(sudokuObj.difficulty);
-        Object.assign(newSudokuObj, sudokuObj);
-
-        if (noteMode) {
-          newSudokuObj.handleNoteAtBoxNum(boxNum, event.key);
-        } else {
-          // FILL IN NUMBER OR ERASE FILL IN NUMBER
-          // clear
-          newSudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
-          if (String(newSudokuObj.getElementAtBoxNum(boxNum)) === event.key) {
-            alert("RIGHT ONE!");
-            newSudokuObj.addToRevealed(boxNum, event.key);
-          } else {
-            alert("WRONG ONE");
-            newSudokuObj.handleWrongGuess(boxNum, event.key);
-          }
-        }
-
-        setSudokuObj(newSudokuObj);
-      }
-    };
     window.addEventListener("keydown", handleKeyPress);
 
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isSelected, noteMode, sudokuObj, setSudokuObj, boxNum]);
+  }, [isSelected, handleKeyPress]);
 
-  //noteMode, sudokuObj, setSudokuObj, boxNum
-  if (JSON.stringify(boxNum) in sudokuObj.notes !== true) {
-    sudokuObj.notes[JSON.stringify(boxNum)] = new Set<String>();
+  if (!(JSON.stringify(boxNum) in sudoku.notes)) {
+    sudoku.notes[JSON.stringify(boxNum)] = new Set<String>();
   }
-  const noteSet = sudokuObj.notes[JSON.stringify(boxNum)];
+  const noteSet = sudoku.notes[JSON.stringify(boxNum)];
   const classNames = [
     "sudoku-box",
     isBoxHighlight && "box-highlight",
@@ -79,18 +77,15 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
     .join(" ");
   const showNotes = noteMode || noteSet.size > 0;
   return (
-    <button className={classNames} onClick={() => highlightFunction(0, boxNum)}>
-      {" "}
+    <button className={classNames} onClick={() => onClickBox(boxNum)}>
       {showNotes ? (
         Array.from({ length: 9 }, (_, i) => (
           <div key={i} className="sudoku-note">
-            {sudokuObj.notes[JSON.stringify(boxNum)].has(String(i + 1))
-              ? String(i + 1)
-              : ""}
+            {noteSet.has(String(i + 1)) ? String(i + 1) : ""}
           </div>
         ))
       ) : (
-        <div className="sudoku-number ">{}</div>
+        <div className="sudoku-number">{}</div>
       )}
     </button>
   );
