@@ -4,14 +4,17 @@ import "./App.css";
 import "./overlay.css";
 import SudokuBoard from "./components/SudokuBoard";
 import { SudokuProvider, useSudoku } from "./hooks/SudokuContext";
-import { Sudoku, SudokuDifficulty } from "./utility/Sudoku";
+import { createSeed, Sudoku, SudokuDifficulty } from "./utility/Sudoku";
 
 const AppContent: React.FC = () => {
   const { sudoku, setSudoku } = useSudoku();
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const seed = createSeed(sudoku.board, sudoku.revealed);
+
   const [winScreen, setWinScreen] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const timerRef = useRef<number | null>(null);
+  const [showFullSeed, setShowFullSeed] = useState<boolean>(false);
 
   useEffect(() => {
     // Start timer
@@ -82,18 +85,28 @@ const AppContent: React.FC = () => {
         <div className="overlay">
           <div className="overlay-content">
             <h1>You Won!</h1>
+            <button onClick={() => window.location.reload()}>Go Again!</button>
           </div>
         </div>
       )}
       <SudokuBoard />
       <span>Time Elapsed: {timerDisplay}</span>
+      <br />
+      <span
+        onClick={() => {
+          setShowFullSeed(!showFullSeed);
+        }}
+        style={{ cursor: "pointer", textDecoration: "underline" }}
+      >
+        Seed: {showFullSeed ? seed : `${seed.substring(0, 10)}...`}
+      </span>
     </div>
   );
 };
 
 const App: React.FC = () => {
   return (
-    <SudokuProvider difficulty={SudokuDifficulty.Debug}>
+    <SudokuProvider difficulty={SudokuDifficulty.Hard}>
       <AppContent />
     </SudokuProvider>
   );

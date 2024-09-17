@@ -3,10 +3,12 @@ import "../SudokuCountTable.css";
 
 interface SudokuCountTableProps {
   valueToAmountObj: { [key: number]: number };
+  onClickNum: (value: number) => void;
 }
 
 const SudokuCountTable: React.FC<SudokuCountTableProps> = ({
   valueToAmountObj,
+  onClickNum,
 }) => {
   return (
     <table className="sudoku-count-table">
@@ -19,7 +21,7 @@ const SudokuCountTable: React.FC<SudokuCountTableProps> = ({
       <tbody>
         {Object.keys(valueToAmountObj).map((value, index) => (
           <tr key={value} className={index % 2 === 0 ? "active-row" : ""}>
-            <td>{Number(value)}</td>
+            <td onClick={() => onClickNum(Number(value))}>{Number(value)}</td>
             <td>{valueToAmountObj[Number(value)]}</td>
           </tr>
         ))}

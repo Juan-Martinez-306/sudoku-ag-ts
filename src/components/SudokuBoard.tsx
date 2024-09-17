@@ -49,6 +49,10 @@ const SudokuBoard = () => {
     [clearHighlights, handleHighlightBoxes, handleHighlightNumbers]
   );
 
+  const onClickNumber = useCallback((value: number) => {
+    handleHighlightNumbers(value);
+  }, []);
+
   return (
     <div>
       <div className="sudoku-grid">
@@ -102,7 +106,10 @@ const SudokuBoard = () => {
       <div>
         <span>{"Values Left "}</span>
         <div className="horizontal-row">
-          <SudokuCountTable valueToAmountObj={sudoku.valueToAmountLeft} />
+          <SudokuCountTable
+            valueToAmountObj={sudoku.valueToAmountLeft}
+            onClickNum={onClickNumber}
+          />
         </div>
         <span>{"Total Values Left = " + String(sudoku.amountOfBoxesLeft)}</span>
       </div>

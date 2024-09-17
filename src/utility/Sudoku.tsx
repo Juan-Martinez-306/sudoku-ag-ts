@@ -146,7 +146,30 @@ export enum SudokuDifficulty {
   Hard = 2,
   Debug = -1,
 }
+export function createSeed(board: number[][], revealed: Set<number>): string {
+  const boardString = board.flat().join("");
+  const revealedString = Array.from(revealed)
+    .sort((a, b) => a - b)
+    .join(",");
+  const seed = `${boardString}|${revealedString}`;
+  return btoa(seed);
+}
 
+export function createBoardFromSeed(seed: string): {
+  board: number[][];
+  revealed: Set<number>;
+} {
+  const decodedSeed = btoa(seed);
+  const [boardString, revealedString] = decodedSeed.split("|");
+  const board = Array.from({ length: 9 }, (_, i) =>
+    boardString
+      .slice(i * 9, i * 9 + 9)
+      .split("")
+      .map(Number)
+  );
+  const revealed = new Set(revealedString.split(",").map(Number));
+  return { board, revealed };
+}
 export class Sudoku {
   board: number[][];
   revealed: Set<number>;
