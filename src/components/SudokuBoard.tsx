@@ -5,7 +5,6 @@ import "../SudokuBoard.css";
 import SudokuCell from "./SudokuCell";
 import SudokuCountTable from "./SudokuNumber";
 import { useSudoku } from "../hooks/SudokuContext";
-import { clear } from "console";
 
 export interface SudokuBoardProps {
   sudokuObj: Sudoku;
