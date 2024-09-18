@@ -58,6 +58,65 @@
     transition: background-color 0.3s, box-shadow 0.3s;
 
 }
+.note-mode-button {
+    display: flex;
+    align-items: center;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 20px 0;
+  }
+  
+  .note-mode-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .note-mode-button span {
+    margin-left: 10px;
+  }
+
+  .lives {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin: 10px 0;
+  }
+  
+  .heart-icon {
+    color: red;
+    margin-right: 5px;
+  }
+  
+  .horizontal-align {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Spacing between elements */
+}
+.number-count-button {
+    display: flex;
+    align-items: center;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .number-count-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .number-count-button span {
+    margin-left: 10px;
+  }
 
 .horizontal-row {
     display: flex;

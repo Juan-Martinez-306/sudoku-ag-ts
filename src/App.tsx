@@ -1,17 +1,29 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import "./overlay.css";
 import SudokuBoard from "./components/SudokuBoard";
 import { SudokuProvider, useSudoku } from "./hooks/SudokuContext";
 import { createSeed, Sudoku, SudokuDifficulty } from "./utility/Sudoku";
+import SudokuCountTable from "./components/SudokuNumber";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import SudokuControls from "./components/SudokuControl";
 
 const AppContent: React.FC = () => {
-  const { sudoku, setSudoku } = useSudoku();
+  const { sudoku, setSudoku, handleHighlightNumbers } = useSudoku();
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [noteMode, setNoteMode] = useState<boolean>(false);
   const seed = createSeed(sudoku.board, sudoku.revealed);
 
   const [winScreen, setWinScreen] = useState<boolean>(false);
+  const [showCount, setShowCount] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const timerRef = useRef<number | null>(null);
   const [showFullSeed, setShowFullSeed] = useState<boolean>(false);
@@ -47,6 +59,10 @@ const AppContent: React.FC = () => {
   const revealBoard = () => {
     const newSudoku = new Sudoku(sudoku.difficulty);
     Object.assign(newSudoku, sudoku);
+    newSudoku.highlightedBoxes.clear();
+    newSudoku.amountOfBoxesLeft = 0;
+    newSudoku.highlightedNumbers.clear();
+    newSudoku.showWrong.clear();
     newSudoku.revealed = new Set<number>();
     for (let i = 0; i < 9; ++i) {
       for (let k = 0; k < 9; ++k) {
@@ -57,14 +73,21 @@ const AppContent: React.FC = () => {
     setGameOver(false);
   };
 
+  const onClickNumber = useCallback((value: number) => {
+    handleHighlightNumbers(value);
+  }, []);
+  const onClickSeed = () => {
+    setShowFullSeed(!showFullSeed);
+  };
+
   useEffect(() => {
-    if (sudoku.lives <= 0) {
+    if (sudoku.lives <= 0 && gameOver === false) {
       setGameOver(true);
     }
   }, [sudoku.lives]);
 
   useEffect(() => {
-    if (sudoku.amountOfBoxesLeft === 0) {
+    if (sudoku.amountOfBoxesLeft === 0 && sudoku.lives > 0) {
       setWinScreen(true);
     }
   }, [sudoku.amountOfBoxesLeft]);
@@ -89,17 +112,44 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       )}
-      <SudokuBoard />
-      <span>Time Elapsed: {timerDisplay}</span>
-      <br />
-      <span
-        onClick={() => {
-          setShowFullSeed(!showFullSeed);
-        }}
-        style={{ cursor: "pointer", textDecoration: "underline" }}
-      >
-        Seed: {showFullSeed ? seed : `${seed.substring(0, 10)}...`}
-      </span>
+      <header className="header">
+        <h1>Sudoku Game</h1>
+      </header>
+      <main className="main-content">
+        <SudokuBoard noteMode={noteMode} />
+        <SudokuControls
+          setNoteMode={setNoteMode}
+          noteMode={noteMode}
+          setShowCount={() => {
+            setShowCount(!showCount);
+          }}
+          onClickSeed={onClickSeed}
+          showFullSeed={showFullSeed}
+        />
+        {showFullSeed && (
+          <div className="seed-box">
+            <p>{seed}</p>
+          </div>
+        )}
+        {showCount && (
+          <div>
+            <div className="horizontal-row">
+              <SudokuCountTable
+                valueToAmountObj={sudoku.valueToAmountLeft}
+                onClickNum={onClickNumber}
+              />
+            </div>
+            {/* <span>
+              {"Total Values Left = " + String(sudoku.amountOfBoxesLeft)}
+            </span> */}
+          </div>
+        )}
+        <span>Time Elapsed: {timerDisplay}</span>
+        <br />
+      </main>
+      <footer className="footer">
+        <span>Sudoku Game © 2024</span>
+      </footer>
     </div>
   );
 };

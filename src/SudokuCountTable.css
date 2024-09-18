@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 10px;
     background-color: #f4f4f4;
 }
 
@@ -12,14 +12,15 @@ body {
     align-items: center;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
     background-color: #ffffff;
+    border: 1px solid #ccc;
     padding: 4px;
     border-radius: 8px;
 }
 
 .sudoku-count-table .sudoku-count {
-    margin: 0 10px; /* Adjust the spacing between numbers as needed */
+    margin: 0 10px;
     text-align: center;
-    padding: 10px;
+    padding: 5px;
     border-radius: 4px;
 }
 
@@ -27,16 +28,17 @@ body {
     transition: background-color 0.3s, transform 0.3s;
     cursor: pointer;
     padding: 10px;
-    border-radius: 75%;
+    border-radius: 8px;
     background-color: #007bff;
     color: #ffffff;
     font-weight: bold;
     font-size: 1.2em;
-    display: inline-block;
     width: 40px;
     height: 40px;
     line-height: 40px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .sudoku-count-table .sudoku-count .clickable-number:hover {
@@ -45,9 +47,9 @@ body {
 }
 
 .sudoku-count-table .sudoku-count .count {
-    margin-top: 3px;
+    margin-top: 2px;
     font-size: 1em;
-    font: bold;
+    font-weight: bold;
     color: #ffffff;
     background-color: #000000;
     padding: 5px;

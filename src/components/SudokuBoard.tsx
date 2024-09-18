@@ -1,21 +1,18 @@
 import React, { memo, useEffect, useState, useCallback } from "react";
-import { Sudoku } from "../utility/Sudoku";
 import SudokuBox from "./SudokuBox";
 import "../SudokuBoard.css";
 import SudokuCell from "./SudokuCell";
-import SudokuCountTable from "./SudokuNumber";
 import { useSudoku } from "../hooks/SudokuContext";
 
 export interface SudokuBoardProps {
-  sudokuObj: Sudoku;
-  setSudokuObj: React.Dispatch<React.SetStateAction<Sudoku>>;
+  noteMode: boolean;
 }
 
 const getBoxNum = (row: number, col: number) => {
   return row * 9 + col;
 };
 
-const SudokuBoard = () => {
+const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
   const {
     sudoku,
     handleHighlightNumbers,
@@ -23,7 +20,6 @@ const SudokuBoard = () => {
     clearHighlights,
   } = useSudoku();
   const [selectedBox, setSelectedBox] = useState<number | null>(null);
-  const [noteMode, setNoteMode] = useState(false);
 
   function shouldHighlightAsWrong(boxNum: number) {
     return sudoku.showWrong.has(boxNum);
@@ -47,10 +43,6 @@ const SudokuBoard = () => {
     },
     [clearHighlights, handleHighlightBoxes, handleHighlightNumbers]
   );
-
-  const onClickNumber = useCallback((value: number) => {
-    handleHighlightNumbers(value);
-  }, []);
 
   return (
     <div>
@@ -91,26 +83,6 @@ const SudokuBoard = () => {
             })}
           </div>
         ))}
-      </div>
-      <button
-        onClick={() => {
-          setNoteMode(!noteMode);
-        }}
-      >
-        Change Note Mode - {String(noteMode)}
-      </button>
-      <div>
-        <span>{"Lives = " + String(sudoku.lives)}</span>
-      </div>
-      <div>
-        <span>{"Values Left "}</span>
-        <div className="horizontal-row">
-          <SudokuCountTable
-            valueToAmountObj={sudoku.valueToAmountLeft}
-            onClickNum={onClickNumber}
-          />
-        </div>
-        <span>{"Total Values Left = " + String(sudoku.amountOfBoxesLeft)}</span>
       </div>
     </div>
   );
