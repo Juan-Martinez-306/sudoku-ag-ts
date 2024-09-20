@@ -5,20 +5,22 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import SudokuBoard from "../components/SudokuBoard";
 import { SudokuProvider, useSudoku } from "../hooks/SudokuContext";
-import { Sudoku } from "../utility/Sudoku";
+import { createSeed, Sudoku } from "../utility/Sudoku";
 import "./SudokuGame.css";
 import SudokuControls from "../components/SudokuControl";
 import SudokuCountTable from "../components/SudokuNumber";
 
+interface RouteParams extends Record<string, string | undefined> {
+  difficulty: string;
+  seed?: string;
+}
+
 const SudokuGame: React.FC = () => {
   const { sudoku, setSudoku, handleHighlightNumbers } = useSudoku();
-  const location = useLocation();
-  const seed = location.search.startsWith("?")
-    ? location.search.substring(1)
-    : location.search;
+  const [seed] = useState(createSeed(sudoku.board, sudoku.revealed));
 
   const [noteMode, setNoteMode] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -34,13 +36,15 @@ const SudokuGame: React.FC = () => {
       newSudoku.initializeSudokuFromSeed(seed);
       setSudoku(newSudoku);
     }
-  }, [seed, setSudoku]);
+  }, [seed]);
 
   useEffect(() => {
+    // Start timer
     timerRef.current = window.setInterval(() => {
       setTimerSeconds((prevTime) => prevTime + 1);
     }, 1000);
 
+    // Clear after done
     return () => {
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current);
@@ -65,6 +69,10 @@ const SudokuGame: React.FC = () => {
   const revealBoard = () => {
     const newSudoku = new Sudoku(sudoku.difficulty);
     Object.assign(newSudoku, sudoku);
+    newSudoku.highlightedBoxes.clear();
+    newSudoku.amountOfBoxesLeft = 0;
+    newSudoku.highlightedNumbers.clear();
+    newSudoku.showWrong.clear();
     newSudoku.revealed = new Set<number>();
     for (let i = 0; i < 9; ++i) {
       for (let k = 0; k < 9; ++k) {
@@ -130,6 +138,16 @@ const SudokuGame: React.FC = () => {
         {showFullSeed && (
           <div className="seed-box">
             <p>{seed ?? "empty"}</p>
+            <button
+              className={"copy-button"}
+              onClick={() => {
+                if (seed) {
+                  navigator.clipboard.writeText(seed);
+                }
+              }}
+            >
+              Copy
+            </button>
           </div>
         )}
         {showCount && (
@@ -157,12 +175,13 @@ const SudokuGame: React.FC = () => {
 
 const SudokuGamePage: React.FC = () => {
   //   const { seed } = useParams<{ seed: string }>();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const difficulty = Number(queryParams.get("difficulty"));
+  const { difficulty, seed } = useParams<RouteParams>();
+  const difNum = difficulty === "easy" ? 0 : difficulty === "medium" ? 1 : 2;
+  console.log(difficulty, "Difficulty");
+  console.log(seed, "Seed");
 
   return (
-    <SudokuProvider difficulty={difficulty}>
+    <SudokuProvider difficulty={difNum} seed={seed ?? undefined}>
       <SudokuGame />
     </SudokuProvider>
   );

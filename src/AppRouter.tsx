@@ -10,7 +10,10 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/sudokuBoard/:seed" element={<SudokuGamePage />} />
+        <Route
+          path="/sudokuBoard/:difficulty/:seed"
+          element={<SudokuGamePage />}
+        />
       </Routes>
     </Router>
   );

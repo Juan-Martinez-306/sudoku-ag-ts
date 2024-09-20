@@ -5,13 +5,17 @@ import "./HomePage.css";
 
 const HomePage: React.FC = () => {
   const [difficulty, setDifficulty] = useState<string>("easy");
+  const [seed, setSeed] = useState<string>("");
   const generateGameURL = () => {
     const sudokuDiff =
       difficulty === "easy" ? 0 : difficulty === "medium" ? 1 : 2;
     const sudokuState = new Sudoku(sudokuDiff);
     sudokuState.initializeSudokuFromScratch();
-    const seedPath = createSeed(sudokuState.board, sudokuState.revealed);
-    return `/sudokuBoard/seed?${seedPath}`;
+    let seedPath = seed;
+    if (!seed) {
+      seedPath = createSeed(sudokuState.board, sudokuState.revealed);
+    }
+    return `/sudokuBoard/${difficulty}/${seedPath}`;
   };
 
   return (
@@ -28,6 +32,11 @@ const HomePage: React.FC = () => {
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
           </select>
+          <p>(OPTIONAL): Import Seed</p>
+          <input
+            type="text"
+            onChange={(e) => setSeed((e.target as HTMLInputElement).value)}
+          />
         </label>
       </div>
       <Link to={generateGameURL()}>

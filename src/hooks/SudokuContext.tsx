@@ -23,19 +23,40 @@ const SudokuContext = createContext<SudokuContextProps | undefined>(undefined);
 interface SudokuProviderProps {
   difficulty: SudokuDifficulty;
   children: React.ReactNode;
+  seed?: string;
 }
 
 export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   children,
   difficulty,
+  seed,
 }) => {
   const sudokuObject = new Sudoku(difficulty);
   sudokuObject.initializeSudokuFromScratch();
-  const [sudoku, setSudoku] = useState(sudokuObject);
+  const [sudoku, setSudoku] = useState(() => {
+    const sudokuObject = new Sudoku(difficulty);
+    if (seed) {
+      sudokuObject.initializeSudokuFromSeed(seed);
+    } else {
+      sudokuObject.initializeSudokuFromScratch();
+    }
+    return sudokuObject;
+  });
+
+  useEffect(() => {
+    const sudokuObject = new Sudoku(difficulty);
+    if (seed) {
+      sudokuObject.initializeSudokuFromSeed(seed);
+    } else {
+      sudokuObject.initializeSudokuFromScratch();
+    }
+    setSudoku(sudokuObject);
+  }, [difficulty, seed]);
 
   const handleHighlightNumbers = useCallback(
     (value: number) => {
       const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
+
       newSudoku.highlightedNumbers.clear();
       newSudoku.highlightNumbersEqualToValue(value);
       setSudoku(newSudoku);

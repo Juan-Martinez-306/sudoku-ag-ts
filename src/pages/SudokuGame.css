@@ -11,6 +11,9 @@ body {
   min-height: 100vh;
 }
 
+.copy-button {
+     fontSize: "small"; marginLeft: "10px";
+}
 .header {
   background-color: #007bff;
   color: white;
