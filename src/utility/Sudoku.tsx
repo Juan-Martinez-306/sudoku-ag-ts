@@ -1,3 +1,5 @@
+import { create } from "domain";
+
 export function tupleEquals(a: number[], b: number[]): boolean {
   return a[0] === b[0] && a[1] === b[1];
 }
@@ -159,7 +161,10 @@ export function createBoardFromSeed(seed: string): {
   board: number[][];
   revealed: Set<number>;
 } {
-  const decodedSeed = btoa(seed);
+  if (seed === "") {
+    console.log("Seed is empty");
+  }
+  const decodedSeed = atob(seed);
   const [boardString, revealedString] = decodedSeed.split("|");
   const board = Array.from({ length: 9 }, (_, i) =>
     boardString
@@ -185,16 +190,17 @@ export class Sudoku {
   highlightedBoxes: Set<number>;
   selectedBoxNum: number;
 
-  constructor(diffuculty: SudokuDifficulty) {
-    this.board = generateSudoku();
-    this.difficulty = diffuculty;
-    this.revealed = this.randomRevealed();
+  constructor(difficulty: SudokuDifficulty) {
+    this.board = Array.from({ length: 9 }, () => Array(9).fill(0));
+    this.revealed = new Set<number>();
+    this.difficulty = difficulty;
     this.notes = {};
     for (let i = 0; i < 81; ++i) {
       this.notes[JSON.stringify(i)] = new Set<String>();
     }
     this.showWrong = new Set<number>();
     this.lives = 5 - this.difficulty * 2;
+    this.amountOfBoxesLeft = 81;
     this.valueToAmountLeft = {
       1: 9,
       2: 9,
@@ -206,14 +212,21 @@ export class Sudoku {
       8: 9,
       9: 9,
     };
-    this.amountOfBoxesLeft = 81;
     this.highlightedBoxes = new Set<number>();
     this.highlightedNumbers = new Set<number>();
-
+    this.selectedBoxNum = -1;
+  }
+  initializeSudokuFromScratch() {
+    this.board = generateSudoku();
+    this.revealed = this.randomRevealed();
     // inital values left
     this.determineValuesLeft();
-
-    this.selectedBoxNum = -1;
+  }
+  initializeSudokuFromSeed(seed: string) {
+    const { board, revealed } = createBoardFromSeed(seed);
+    this.board = board;
+    this.revealed = revealed;
+    this.determineValuesLeft();
   }
 
   getElementAtBoxNum(boxNum: number) {

@@ -5,33 +5,42 @@ import React, {
   useRef,
   useState,
 } from "react";
-import "./App.css";
-import "./overlay.css";
-import SudokuBoard from "./components/SudokuBoard";
-import { SudokuProvider, useSudoku } from "./hooks/SudokuContext";
-import { createSeed, Sudoku, SudokuDifficulty } from "./utility/Sudoku";
-import SudokuCountTable from "./components/SudokuNumber";
-import SudokuControls from "./components/SudokuControl";
+import { useLocation } from "react-router-dom";
+import SudokuBoard from "../components/SudokuBoard";
+import { SudokuProvider, useSudoku } from "../hooks/SudokuContext";
+import { Sudoku } from "../utility/Sudoku";
+import "./SudokuGame.css";
+import SudokuControls from "../components/SudokuControl";
+import SudokuCountTable from "../components/SudokuNumber";
 
-const AppContent: React.FC = () => {
+const SudokuGame: React.FC = () => {
   const { sudoku, setSudoku, handleHighlightNumbers } = useSudoku();
-  const [gameOver, setGameOver] = useState<boolean>(false);
-  const [noteMode, setNoteMode] = useState<boolean>(false);
-  const seed = createSeed(sudoku.board, sudoku.revealed);
+  const location = useLocation();
+  const seed = location.search.startsWith("?")
+    ? location.search.substring(1)
+    : location.search;
 
+  const [noteMode, setNoteMode] = useState<boolean>(false);
+  const [gameOver, setGameOver] = useState<boolean>(false);
   const [winScreen, setWinScreen] = useState<boolean>(false);
-  const [showCount, setShowCount] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const timerRef = useRef<number | null>(null);
   const [showFullSeed, setShowFullSeed] = useState<boolean>(false);
+  const [showCount, setShowCount] = useState<boolean>(false);
 
   useEffect(() => {
-    // Start timer
+    if (seed) {
+      const newSudoku = new Sudoku(sudoku.difficulty);
+      newSudoku.initializeSudokuFromSeed(seed);
+      setSudoku(newSudoku);
+    }
+  }, [seed, setSudoku]);
+
+  useEffect(() => {
     timerRef.current = window.setInterval(() => {
       setTimerSeconds((prevTime) => prevTime + 1);
     }, 1000);
 
-    // Clear after done
     return () => {
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current);
@@ -56,10 +65,6 @@ const AppContent: React.FC = () => {
   const revealBoard = () => {
     const newSudoku = new Sudoku(sudoku.difficulty);
     Object.assign(newSudoku, sudoku);
-    newSudoku.highlightedBoxes.clear();
-    newSudoku.amountOfBoxesLeft = 0;
-    newSudoku.highlightedNumbers.clear();
-    newSudoku.showWrong.clear();
     newSudoku.revealed = new Set<number>();
     for (let i = 0; i < 9; ++i) {
       for (let k = 0; k < 9; ++k) {
@@ -76,9 +81,8 @@ const AppContent: React.FC = () => {
   const onClickSeed = () => {
     setShowFullSeed(!showFullSeed);
   };
-
   useEffect(() => {
-    if (sudoku.lives <= 0 && gameOver === false) {
+    if (sudoku.lives <= 0) {
       setGameOver(true);
     }
   }, [sudoku.lives]);
@@ -125,7 +129,7 @@ const AppContent: React.FC = () => {
         />
         {showFullSeed && (
           <div className="seed-box">
-            <p>{seed}</p>
+            <p>{seed ?? "empty"}</p>
           </div>
         )}
         {showCount && (
@@ -151,12 +155,17 @@ const AppContent: React.FC = () => {
   );
 };
 
-const App: React.FC = () => {
+const SudokuGamePage: React.FC = () => {
+  //   const { seed } = useParams<{ seed: string }>();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const difficulty = Number(queryParams.get("difficulty"));
+
   return (
-    <SudokuProvider difficulty={SudokuDifficulty.Hard}>
-      <AppContent />
+    <SudokuProvider difficulty={difficulty}>
+      <SudokuGame />
     </SudokuProvider>
   );
 };
 
-export default App;
+export default SudokuGamePage;

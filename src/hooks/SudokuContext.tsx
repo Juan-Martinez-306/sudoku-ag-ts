@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import { Sudoku, SudokuDifficulty } from "../utility/Sudoku";
 
 interface SudokuContextProps {
@@ -23,7 +29,9 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   children,
   difficulty,
 }) => {
-  const [sudoku, setSudoku] = useState(new Sudoku(difficulty));
+  const sudokuObject = new Sudoku(difficulty);
+  sudokuObject.initializeSudokuFromScratch();
+  const [sudoku, setSudoku] = useState(sudokuObject);
 
   const handleHighlightNumbers = useCallback(
     (value: number) => {
