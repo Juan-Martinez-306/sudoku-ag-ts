@@ -12,6 +12,12 @@ import { createSeed, Sudoku } from "../utility/Sudoku";
 import "./SudokuGame.css";
 import SudokuControls from "../components/SudokuControl";
 import SudokuCountTable from "../components/SudokuNumber";
+import {
+  updateBestTime,
+  updateContinues,
+  updateLosses,
+  updateWins,
+} from "../utility/Stats";
 
 interface RouteParams extends Record<string, string | undefined> {
   difficulty: string;
@@ -64,6 +70,7 @@ const SudokuGame: React.FC = () => {
     newSudoku.lives = 5 - newSudoku.difficulty * 2;
     setSudoku(newSudoku);
     setGameOver(false);
+    updateContinues();
   };
 
   const revealBoard = () => {
@@ -92,12 +99,22 @@ const SudokuGame: React.FC = () => {
   useEffect(() => {
     if (sudoku.lives <= 0) {
       setGameOver(true);
+      updateLosses();
     }
   }, [sudoku.lives]);
 
+  // Check if game is over if so update local storage
   useEffect(() => {
     if (sudoku.amountOfBoxesLeft === 0 && sudoku.lives > 0) {
       setWinScreen(true);
+      const difString =
+        sudoku.difficulty === 0
+          ? "easy"
+          : sudoku.difficulty === 1
+          ? "medium"
+          : "hard";
+      updateWins(difString);
+      updateBestTime(difString, timerSeconds);
     }
   }, [sudoku.amountOfBoxesLeft]);
 

@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import SudokuGamePage from "./pages/SudokuGamePage";
-
+import SudokuStats from "./components/SudokuStats";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -14,6 +14,7 @@ const App: React.FC = () => {
           path="/sudokuBoard/:difficulty/:seed"
           element={<SudokuGamePage />}
         />
+        <Route path="/stats" element={<SudokuStats />} />
       </Routes>
     </Router>
   );

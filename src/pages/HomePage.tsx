@@ -42,6 +42,10 @@ const HomePage: React.FC = () => {
       <Link to={generateGameURL()}>
         <button>Start Game</button>
       </Link>
+      <br />
+      <Link to="/stats">
+        <button>Go to Stats</button>
+      </Link>
     </div>
   );
 };
