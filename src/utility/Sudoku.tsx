@@ -179,7 +179,7 @@ export class Sudoku {
   board: number[][];
   revealed: Set<number>;
   notes: {
-    [key: string]: Set<String>;
+    [key: string]: Set<string>;
   };
   showWrong: Set<number>;
   difficulty: SudokuDifficulty;
@@ -196,7 +196,7 @@ export class Sudoku {
     this.difficulty = difficulty;
     this.notes = {};
     for (let i = 0; i < 81; ++i) {
-      this.notes[JSON.stringify(i)] = new Set<String>();
+      this.notes[JSON.stringify(i)] = new Set<string>();
     }
     this.showWrong = new Set<number>();
     this.lives = 5 - this.difficulty * 2;
@@ -234,7 +234,7 @@ export class Sudoku {
     return this.board[cord.row][cord.col];
   }
 
-  addToRevealed(boxNum: number, value: String) {
+  addToRevealed(boxNum: number, value: string) {
     // Box at boxnum is now revealed
     this.revealed.add(boxNum);
 
@@ -265,7 +265,7 @@ export class Sudoku {
     }
   }
 
-  handleUpdateShowWrong(boxNum: number, note: String) {
+  handleUpdateShowWrong(boxNum: number, note: string) {
     const temp_wrong = new Set<number>();
     for (const boxNum2 of this.revealed) {
       if (
@@ -280,7 +280,7 @@ export class Sudoku {
     this.showWrong = temp_wrong;
   }
 
-  handleNoteAtBoxNum(boxNum: number, note: String) {
+  handleNoteAtBoxNum(boxNum: number, note: string) {
     // handle new showWrong
     this.handleUpdateShowWrong(boxNum, note);
     // If no conflicting numbers add or delete note
@@ -319,7 +319,7 @@ export class Sudoku {
       }
     }
   }
-  handleWrongGuess(boxNum: number, value: String) {
+  handleWrongGuess(boxNum: number, value: string) {
     this.removeLife();
     this.handleUpdateShowWrong(boxNum, value);
   }
