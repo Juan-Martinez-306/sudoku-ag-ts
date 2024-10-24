@@ -36,7 +36,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
         if (noteMode) {
           newSudoku.handleNoteAtBoxNum(boxNum, event.key);
         } else {
-          newSudoku.notes[JSON.stringify(boxNum)] = new Set<String>();
+          newSudoku.notes[JSON.stringify(boxNum)] = new Set<string>();
           if (String(newSudoku.getElementAtBoxNum(boxNum)) === event.key) {
             alert("RIGHT ONE!");
             newSudoku.addToRevealed(boxNum, event.key);
@@ -64,7 +64,7 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
   }, [isSelected, handleKeyPress]);
 
   if (!(JSON.stringify(boxNum) in sudoku.notes)) {
-    sudoku.notes[JSON.stringify(boxNum)] = new Set<String>();
+    sudoku.notes[JSON.stringify(boxNum)] = new Set<string>();
   }
   const noteSet = sudoku.notes[JSON.stringify(boxNum)];
   const classNames = [

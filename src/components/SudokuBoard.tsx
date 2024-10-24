@@ -19,7 +19,6 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
     handleHighlightBoxes,
     clearHighlights,
   } = useSudoku();
-  const [selectedBox, setSelectedBox] = useState<number | null>(null);
 
   function shouldHighlightAsWrong(boxNum: number) {
     return sudoku.showWrong.has(boxNum);
@@ -27,7 +26,6 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
 
   const onClickBox = useCallback(
     (boxNum: number) => {
-      setSelectedBox(boxNum);
       clearHighlights();
       handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
     },
@@ -36,7 +34,6 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
 
   const onClickCell = useCallback(
     (cellValue: number, boxNum: number) => {
-      setSelectedBox(boxNum);
       clearHighlights();
       handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
       handleHighlightNumbers(cellValue);
@@ -55,7 +52,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
               const isBoxHighlight = sudoku.highlightedBoxes.has(boxNum);
               const isNumHighlight = sudoku.highlightedNumbers.has(boxNum);
               const wrongValue = shouldHighlightAsWrong(boxNum);
-              const isSelected = selectedBox === boxNum;
+              const isSelected = sudoku.selectedBoxNum === boxNum;
               const cell_value = sudoku.board[rowIndex][colIndex];
 
               return isRevealed ? (

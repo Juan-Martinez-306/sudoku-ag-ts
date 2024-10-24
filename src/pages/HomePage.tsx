@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Sudoku, createSeed } from "../utility/Sudoku";
 import "./HomePage.css";
+import { getContinueSudokuBoard } from "../utility/ContinueSudokuBoard";
 
 const HomePage: React.FC = () => {
   const [difficulty, setDifficulty] = useState<string>("easy");
   const [seed, setSeed] = useState<string>("");
+  const continueGame = getContinueSudokuBoard();
   const generateGameURL = () => {
     const sudokuDiff =
       difficulty === "easy" ? 0 : difficulty === "medium" ? 1 : 2;
@@ -43,6 +45,17 @@ const HomePage: React.FC = () => {
         <button>Start Game</button>
       </Link>
       <br />
+      {continueGame !== null && (
+        <>
+          <Link to={"/continue"}>
+            <button>
+              Continue Game at Seed = {localStorage.getItem("continueTime")}
+            </button>
+          </Link>
+          <br />
+        </>
+      )}
+
       <Link to="/stats">
         <button>Go to Stats</button>
       </Link>

@@ -5,16 +5,16 @@ body {
   background-color: #f4f4f4;
 }
 
-.sudoku-game {
+/* .sudoku-game {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
+} */
 
 .copy-button {
      fontSize: "small"; marginLeft: "10px";
 }
-.header {
+/* .header {
   background-color: #007bff;
   color: white;
   padding: 20px;
@@ -24,7 +24,7 @@ body {
   top: 0;
   left: 0;
   z-index: 1000;
-}
+} */
 
 .main-content {
   flex: 1;

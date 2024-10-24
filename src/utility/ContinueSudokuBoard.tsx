@@ -1,16 +1,18 @@
+// Definition of functions to save and load the current sudoku board state to local storage.
+
 import { Sudoku } from "../utility/Sudoku";
 
 interface ContinueSudokuBoard {
   board: number[][];
-  revealed: Set<number>;
-  notes: { [key: string]: Set<string> };
-  showWrong: Set<number>;
+  revealed: string;
+  notes: string;
+  showWrong: string;
   difficulty: number;
   lives: number;
   amountOfBoxesLeft: number;
   valueToAmountLeft: { [key: number]: number };
-  highlightedNumbers: Set<number>;
-  highlightedBoxes: Set<number>;
+  highlightedNumbers: string;
+  highlightedBoxes: string;
   selectedBoxNum: number;
 }
 
@@ -22,46 +24,82 @@ export const getContinueSudokuBoard = (): Sudoku | null => {
     : null;
 };
 
-export const setContinueSudokuBoard = (board: Sudoku) => {
+export const setContinueGame = (
+  board: Sudoku,
+  timeSeconds: number,
+  initalSeed: string
+) => {
+  setContinueSudokuBoard(board);
+  setGameVariables(timeSeconds, initalSeed);
+};
+
+const setContinueSudokuBoard = (board: Sudoku) => {
+  console.log("board", board);
   const continueBoard = saveSudokuIntoContinueSudokuBoard(board);
+  console.log("continueBoard", continueBoard);
+  console.log("string continueBoard", JSON.stringify(continueBoard));
   localStorage.setItem("continueSudokuBoard", JSON.stringify(continueBoard));
 };
 
-export const clearContinueSudokuBoard = () => {
+const setGameVariables = (timeSeconds: number, initialSeed: string) => {
+  localStorage.setItem("continueTime", String(timeSeconds));
+  localStorage.setItem("continueSeed", initialSeed);
+};
+
+export const clearContinueGame = () => {
   localStorage.removeItem("continueSudokuBoard");
+  localStorage.removeItem("continueTime");
+  localStorage.removeItem("continueSeed");
 };
 
 const saveSudokuIntoContinueSudokuBoard = (
   sudoku: Sudoku
 ): ContinueSudokuBoard => {
-  return {
+  const replacer = (key: string, value: any) => {
+    if (value instanceof Set) {
+      return [...value];
+    }
+    return value;
+  };
+  const continueBoard: ContinueSudokuBoard = {
     board: sudoku.board,
-    revealed: sudoku.revealed,
-    notes: sudoku.notes,
-    showWrong: sudoku.showWrong,
+    revealed: JSON.stringify(Array.from(sudoku.revealed)),
+    notes: JSON.stringify(sudoku.notes, replacer),
+    showWrong: JSON.stringify(Array.from(sudoku.showWrong)),
     difficulty: sudoku.difficulty,
     lives: sudoku.lives,
     amountOfBoxesLeft: sudoku.amountOfBoxesLeft,
     valueToAmountLeft: sudoku.valueToAmountLeft,
-    highlightedNumbers: sudoku.highlightedNumbers,
-    highlightedBoxes: sudoku.highlightedBoxes,
+    highlightedNumbers: JSON.stringify(Array.from(sudoku.highlightedNumbers)),
+    highlightedBoxes: JSON.stringify(Array.from(sudoku.highlightedBoxes)),
     selectedBoxNum: sudoku.selectedBoxNum,
   };
+  return continueBoard;
 };
 
 export const importSudokuFromContinueSudokuBoard = (
   board: ContinueSudokuBoard
 ): Sudoku => {
+  const convertToSets = (obj: { [key: string]: any[] }) => {
+    let result: { [key: string]: Set<string> } = {};
+
+    for (const key in obj) {
+      result[key] = new Set<string>(obj[key]);
+    }
+    return result;
+  };
   const sudoku = new Sudoku(board.difficulty);
   sudoku.board = board.board;
-  sudoku.revealed = board.revealed;
-  sudoku.notes = board.notes;
-  sudoku.showWrong = board.showWrong;
+  sudoku.revealed = new Set<number>(JSON.parse(board.revealed));
+  sudoku.notes = convertToSets(JSON.parse(board.notes));
+  sudoku.showWrong = new Set<number>(JSON.parse(board.showWrong));
   sudoku.lives = board.lives;
   sudoku.amountOfBoxesLeft = board.amountOfBoxesLeft;
   sudoku.valueToAmountLeft = board.valueToAmountLeft;
-  sudoku.highlightedNumbers = board.highlightedNumbers;
-  sudoku.highlightedBoxes = board.highlightedBoxes;
+  sudoku.highlightedNumbers = new Set<number>(
+    JSON.parse(board.highlightedNumbers)
+  );
+  sudoku.highlightedBoxes = new Set<number>(JSON.parse(board.highlightedBoxes));
   sudoku.selectedBoxNum = board.selectedBoxNum;
   return sudoku;
 };

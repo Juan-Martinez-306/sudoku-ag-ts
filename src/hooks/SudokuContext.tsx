@@ -6,6 +6,10 @@ import React, {
   useEffect,
 } from "react";
 import { Sudoku, SudokuDifficulty } from "../utility/Sudoku";
+import {
+  clearContinueGame,
+  getContinueSudokuBoard,
+} from "../utility/ContinueSudokuBoard";
 
 interface SudokuContextProps {
   sudoku: Sudoku;
@@ -24,17 +28,29 @@ interface SudokuProviderProps {
   difficulty: SudokuDifficulty;
   children: React.ReactNode;
   seed?: string;
+  isContinued?: boolean;
 }
 
 export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   children,
   difficulty,
   seed,
+  isContinued,
 }) => {
-  const sudokuObject = new Sudoku(difficulty);
-  sudokuObject.initializeSudokuFromScratch();
   const [sudoku, setSudoku] = useState(() => {
     const sudokuObject = new Sudoku(difficulty);
+    if (isContinued) {
+      const continueBoard = getContinueSudokuBoard();
+      console.log("IMPORTED CONTINUE BOARD", continueBoard);
+      if (continueBoard) {
+        sudokuObject.import(continueBoard);
+        console.log("RETURNING THIS BOARD", sudokuObject);
+        return sudokuObject;
+      } else {
+        console.log("ERROR: No continue board found");
+        clearContinueGame();
+      }
+    }
     if (seed) {
       sudokuObject.initializeSudokuFromSeed(seed);
     } else {
@@ -45,10 +61,15 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
 
   useEffect(() => {
     const sudokuObject = new Sudoku(difficulty);
-    if (seed) {
+    if (seed && !isContinued) {
       sudokuObject.initializeSudokuFromSeed(seed);
-    } else {
+    } else if (!isContinued) {
       sudokuObject.initializeSudokuFromScratch();
+    } else if (isContinued) {
+      const continueBoard = getContinueSudokuBoard();
+      if (continueBoard) {
+        sudokuObject.import(continueBoard);
+      }
     }
     setSudoku(sudokuObject);
   }, [difficulty, seed]);
@@ -67,7 +88,7 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   const handleHighlightBoxes = useCallback(
     (row: number, col: number) => {
       const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
-
+      newSudoku.selectedBoxNum = row * 9 + col;
       newSudoku.highlightedBoxes.clear();
       newSudoku.highlightBoxesAdjacentToBoxes(row, col);
       setSudoku(newSudoku);

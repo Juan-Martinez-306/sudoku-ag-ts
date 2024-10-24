@@ -1,3 +1,5 @@
+// Definitions of the Game page for the Sudoku Game.
+
 import React, {
   useCallback,
   useEffect,
@@ -5,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import SudokuBoard from "../components/SudokuBoard";
 import { SudokuProvider, useSudoku } from "../hooks/SudokuContext";
 import { createSeed, Sudoku } from "../utility/Sudoku";
@@ -18,20 +20,32 @@ import {
   updateLosses,
   updateWins,
 } from "../utility/Stats";
+import {
+  clearContinueGame,
+  getContinueSudokuBoard,
+  setContinueGame,
+} from "../utility/ContinueSudokuBoard";
 
 interface RouteParams extends Record<string, string | undefined> {
   difficulty: string;
   seed?: string;
 }
 
-const SudokuGame: React.FC = () => {
+// SudokuGameProps
+interface SudokuGameProps {
+  isContinued?: boolean;
+}
+const SudokuGame: React.FC<SudokuGameProps> = ({ isContinued }) => {
   const { sudoku, setSudoku, handleHighlightNumbers } = useSudoku();
   const [seed] = useState(createSeed(sudoku.board, sudoku.revealed));
-
   const [noteMode, setNoteMode] = useState<boolean>(false);
+  const [stopTime, setStopTime] = useState<boolean>(false);
+
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [winScreen, setWinScreen] = useState<boolean>(false);
-  const [timerSeconds, setTimerSeconds] = useState<number>(0);
+  const [timerSeconds, setTimerSeconds] = useState<number>(
+    isContinued ? Number(localStorage.getItem("continueTime")) : 0
+  );
   const timerRef = useRef<number | null>(null);
   const [showFullSeed, setShowFullSeed] = useState<boolean>(false);
   const [showCount, setShowCount] = useState<boolean>(false);
@@ -58,11 +72,25 @@ const SudokuGame: React.FC = () => {
     };
   }, []);
 
+  // AutoSave every 30 seconds.
+  useEffect(() => {
+    if (timerSeconds % 30 === 0 && timerSeconds !== 0 && !stopTime) {
+      setContinueGame(sudoku, timerSeconds, seed);
+      const date = new Date();
+      console.log("AUTO SAVE AT ", date);
+    }
+  }, [timerSeconds, sudoku]);
+
   const timerDisplay = useMemo(() => {
     const minutes = Math.floor(timerSeconds / 60);
     const seconds = timerSeconds % 60;
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   }, [timerSeconds]);
+
+  const resetGame = () => {
+    window.location.reload();
+    clearContinueGame();
+  };
 
   const continueGame = () => {
     const newSudoku = new Sudoku(sudoku.difficulty);
@@ -88,6 +116,7 @@ const SudokuGame: React.FC = () => {
     }
     setSudoku(newSudoku);
     setGameOver(false);
+    clearContinueGame();
   };
 
   const onClickNumber = useCallback((value: number) => {
@@ -105,7 +134,7 @@ const SudokuGame: React.FC = () => {
 
   // Check if game is over if so update local storage
   useEffect(() => {
-    if (sudoku.amountOfBoxesLeft === 0 && sudoku.lives > 0) {
+    if (sudoku.revealed.size === 81 && sudoku.lives > 0) {
       setWinScreen(true);
       const difString =
         sudoku.difficulty === 0
@@ -116,7 +145,16 @@ const SudokuGame: React.FC = () => {
       updateWins(difString);
       updateBestTime(difString, timerSeconds);
     }
-  }, [sudoku.amountOfBoxesLeft]);
+  }, [sudoku.revealed.size, sudoku.lives]);
+
+  const importSudokuFromLocalStorage = () => {
+    const s = getContinueSudokuBoard();
+    if (s === null) {
+      console.log("Nothing Imported");
+    } else {
+      console.log("Imported Sudoku is ", s);
+    }
+  };
 
   return (
     <div className="App">
@@ -124,7 +162,7 @@ const SudokuGame: React.FC = () => {
         <div className="overlay">
           <div className="overlay-content">
             <h1>You Lost!</h1>
-            <button onClick={() => window.location.reload()}>Restart</button>
+            <button onClick={resetGame}>Restart</button>
             <button onClick={continueGame}>Continue</button>
             <button onClick={revealBoard}>Reveal Board</button>
           </div>
@@ -135,10 +173,13 @@ const SudokuGame: React.FC = () => {
           <div className="overlay-content">
             <h1>You Won!</h1>
             <button onClick={() => window.location.reload()}>Go Again!</button>
+            <Link to={"/"}>
+              <button>Go to Home Page</button>
+            </Link>
           </div>
         </div>
       )}
-      <header className="header">
+      <header className="header1">
         <h1>Sudoku Game</h1>
       </header>
       <main className="main-content">
@@ -182,6 +223,12 @@ const SudokuGame: React.FC = () => {
         )}
         <span>Time Elapsed: {timerDisplay}</span>
         <br />
+        <button onClick={importSudokuFromLocalStorage}>
+          Debug Continue Game Import
+        </button>
+        <button onClick={() => setStopTime(!stopTime)}>
+          {stopTime ? "Start Time" : "Stop Time"}
+        </button>
       </main>
       <footer className="footer">
         <span>Sudoku Game © 2024</span>
@@ -190,16 +237,20 @@ const SudokuGame: React.FC = () => {
   );
 };
 
-const SudokuGamePage: React.FC = () => {
+const SudokuGamePage: React.FC<SudokuGameProps> = ({ isContinued = false }) => {
   //   const { seed } = useParams<{ seed: string }>();
   const { difficulty, seed } = useParams<RouteParams>();
   const difNum = difficulty === "easy" ? 0 : difficulty === "medium" ? 1 : 2;
-  console.log(difficulty, "Difficulty");
-  console.log(seed, "Seed");
+  //console.log(difficulty, "Difficulty");
+  //console.log(seed, "Seed");
 
   return (
-    <SudokuProvider difficulty={difNum} seed={seed ?? undefined}>
-      <SudokuGame />
+    <SudokuProvider
+      difficulty={difNum}
+      seed={seed ?? undefined}
+      isContinued={isContinued}
+    >
+      <SudokuGame isContinued={isContinued} />
     </SudokuProvider>
   );
 };

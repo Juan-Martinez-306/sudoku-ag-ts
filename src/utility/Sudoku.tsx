@@ -1,4 +1,4 @@
-import { create } from "domain";
+// Definition of the Sudoku class and utility functions
 
 export function tupleEquals(a: number[], b: number[]): boolean {
   return a[0] === b[0] && a[1] === b[1];
@@ -369,5 +369,19 @@ export class Sudoku {
       }
     }
     return randomSelections;
+  }
+
+  import(state: Sudoku) {
+    this.board = state.board;
+    this.revealed = state.revealed;
+    this.notes = state.notes;
+    this.showWrong = state.showWrong;
+    this.difficulty = state.difficulty;
+    this.lives = state.lives;
+    this.amountOfBoxesLeft = state.amountOfBoxesLeft;
+    this.valueToAmountLeft = state.valueToAmountLeft;
+    this.highlightedNumbers = state.highlightedNumbers;
+    this.highlightedBoxes = state.highlightedBoxes;
+    this.selectedBoxNum = state.selectedBoxNum;
   }
 }
