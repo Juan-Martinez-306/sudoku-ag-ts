@@ -38,10 +38,15 @@ const SudokuBox: React.FC<SudokuBoxProps> = ({
         } else {
           newSudoku.notes[JSON.stringify(boxNum)] = new Set<string>();
           if (String(newSudoku.getElementAtBoxNum(boxNum)) === event.key) {
-            alert("RIGHT ONE!");
+            //alert("RIGHT ONE!");
             newSudoku.addToRevealed(boxNum, event.key);
+            newSudoku.highlightNumbersEqualToValue(Number(event.key));
+            newSudoku.highlightBoxesAdjacentToBoxes(
+              Math.floor(boxNum / 9),
+              boxNum % 9
+            );
           } else {
-            alert("WRONG ONE");
+            //alert("WRONG ONE");
             newSudoku.handleWrongGuess(boxNum, event.key);
           }
         }

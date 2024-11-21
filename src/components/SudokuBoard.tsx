@@ -18,6 +18,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
     handleHighlightNumbers,
     handleHighlightBoxes,
     clearHighlights,
+    deselectBox,
   } = useSudoku();
 
   function shouldHighlightAsWrong(boxNum: number) {
@@ -26,17 +27,29 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ noteMode }) => {
 
   const onClickBox = useCallback(
     (boxNum: number) => {
-      clearHighlights();
-      handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
+      if (sudoku.selectedBoxNum === boxNum) {
+        deselectBox();
+      } else {
+        clearHighlights();
+        handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
+      }
     },
     [clearHighlights, handleHighlightBoxes]
   );
 
   const onClickCell = useCallback(
     (cellValue: number, boxNum: number) => {
-      clearHighlights();
-      handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
-      handleHighlightNumbers(cellValue);
+      if (sudoku.selectedBoxNum === boxNum) {
+        deselectBox();
+      } else {
+        clearHighlights();
+        // HAVE HIGHLIGHT NUMBERS FIRST BECAUSE OTHERWISE IT WONT REGISTER THE SELECTED BOX FROM HIGHLIGHETED BOXES
+        // WHY? BECAUSE THE SELECTED BOX IS SET IN THE HIGHLIGHTED BOXES FUNCTION AND SET ASYNC USING SETSUDOKU
+        // WHICH MEANS THAT THE SELECTED BOX IS NOT SET UNTIL THE NEXT RENDER AND THUS HIGHLIGHT NUMBERS WILL ESSENTIALLY GET
+        // PRERENDER VALUE AND REWRITE SETSUDOKU WITH PRERENDER VALUE
+        handleHighlightNumbers(cellValue);
+        handleHighlightBoxes(Math.floor(boxNum / 9), boxNum % 9);
+      }
     },
     [clearHighlights, handleHighlightBoxes, handleHighlightNumbers]
   );

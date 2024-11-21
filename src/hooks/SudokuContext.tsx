@@ -10,6 +10,7 @@ import {
   clearContinueGame,
   getContinueSudokuBoard,
 } from "../utility/ContinueSudokuBoard";
+import { clear } from "console";
 
 interface SudokuContextProps {
   sudoku: Sudoku;
@@ -20,6 +21,7 @@ interface SudokuContextProps {
   handleNoteAtBoxNum: (boxNum: number, note: string) => void;
   handleWrongGuess: (boxNum: number, value: string) => void;
   removeLife: () => void;
+  deselectBox: () => void;
 }
 
 const SudokuContext = createContext<SudokuContextProps | undefined>(undefined);
@@ -77,8 +79,7 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   const handleHighlightNumbers = useCallback(
     (value: number) => {
       const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
-
-      newSudoku.highlightedNumbers.clear();
+      //newSudoku.highlightedNumbers.clear();
       newSudoku.highlightNumbersEqualToValue(value);
       setSudoku(newSudoku);
     },
@@ -88,8 +89,7 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
   const handleHighlightBoxes = useCallback(
     (row: number, col: number) => {
       const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
-      newSudoku.selectedBoxNum = row * 9 + col;
-      newSudoku.highlightedBoxes.clear();
+      //newSudoku.highlightedBoxes.clear();
       newSudoku.highlightBoxesAdjacentToBoxes(row, col);
       setSudoku(newSudoku);
     },
@@ -98,10 +98,9 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
 
   const clearHighlights = useCallback(() => {
     const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
-    newSudoku.highlightedBoxes.clear();
-    newSudoku.highlightedNumbers.clear();
+    newSudoku.clearHighlights();
     setSudoku(newSudoku);
-  }, []);
+  }, [sudoku]);
   const handleNoteAtBoxNum = useCallback(
     (boxNum: number, note: string) => {
       const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
@@ -124,8 +123,14 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
     const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
     newSudoku.removeLife();
     setSudoku(newSudoku);
-  }, [sudoku.lives]);
+  }, [sudoku]);
 
+  const deselectBox = useCallback(() => {
+    const newSudoku = Object.assign(new Sudoku(sudoku.difficulty), sudoku);
+    newSudoku.selectedBoxNum = -1;
+    newSudoku.clearHighlights();
+    setSudoku(newSudoku);
+  }, [sudoku]);
   return (
     <SudokuContext.Provider
       value={{
@@ -137,6 +142,7 @@ export const SudokuProvider: React.FC<SudokuProviderProps> = ({
         handleNoteAtBoxNum,
         handleWrongGuess,
         removeLife,
+        deselectBox,
       }}
     >
       {children}

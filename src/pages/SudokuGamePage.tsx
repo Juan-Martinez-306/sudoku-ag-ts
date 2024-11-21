@@ -36,7 +36,8 @@ interface SudokuGameProps {
   isContinued?: boolean;
 }
 const SudokuGame: React.FC<SudokuGameProps> = ({ isContinued }) => {
-  const { sudoku, setSudoku, handleHighlightNumbers } = useSudoku();
+  const { sudoku, setSudoku, handleHighlightNumbers, clearHighlights } =
+    useSudoku();
   const [seed] = useState(createSeed(sudoku.board, sudoku.revealed));
   const [noteMode, setNoteMode] = useState<boolean>(false);
   const [stopTime, setStopTime] = useState<boolean>(false);
@@ -119,9 +120,13 @@ const SudokuGame: React.FC<SudokuGameProps> = ({ isContinued }) => {
     clearContinueGame();
   };
 
-  const onClickNumber = useCallback((value: number) => {
-    handleHighlightNumbers(value);
-  }, []);
+  const onClickNumber = useCallback(
+    (value: number) => {
+      clearHighlights();
+      handleHighlightNumbers(value);
+    },
+    [handleHighlightNumbers, clearHighlights]
+  );
   const onClickSeed = () => {
     setShowFullSeed(!showFullSeed);
   };
@@ -144,6 +149,7 @@ const SudokuGame: React.FC<SudokuGameProps> = ({ isContinued }) => {
           : "hard";
       updateWins(difString);
       updateBestTime(difString, timerSeconds);
+      clearContinueGame();
     }
   }, [sudoku.revealed.size, sudoku.lives]);
 

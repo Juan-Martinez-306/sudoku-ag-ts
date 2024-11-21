@@ -306,7 +306,13 @@ export class Sudoku {
       }
     }
   }
+  clearHighlights() {
+    this.highlightedBoxes.clear();
+    this.highlightedNumbers.clear();
+    this.showWrong.clear();
+  }
   highlightBoxesAdjacentToBoxes(row: number, col: number) {
+    this.selectedBoxNum = row * 9 + col;
     for (let i = 0; i < 9; i++) {
       this.highlightedBoxes.add(row * 9 + i);
       this.highlightedBoxes.add(i * 9 + col);
